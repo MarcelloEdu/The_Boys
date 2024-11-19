@@ -40,11 +40,15 @@ struct missao
     int id;
     struct conjunto *habilidades;
     struct coordenadas *coordenadas;
+    int perigo;
 };
 
 int aleat(int min, int max);
+
 struct heroi inicia_heroi(struct heroi *heroi, int id);
+
 struct base inicia_base(struct base *b, int id);
+
 void inicia_missao(struct missao *missao, int id);
- 
+
 #endif
