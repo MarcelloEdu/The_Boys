@@ -9,7 +9,7 @@ struct mundo
     struct base bases[N_BASES];
     struct missao missoes[N_MISSOES];
     struct conjunto *habilidades;
-    struct lef_t *eventos;
+    struct fprio_t *eventos;
     int quant_missoes;
     int relogio;
     int missoes_cumpridas;
@@ -22,7 +22,7 @@ struct equipes{
     int distancia;
 };
 
-struct mundo *inicia_mundo(struct  mundo *mundo);
+void inicia_mundo(struct  mundo *mundo);
 
 void imprime_mundo(struct mundo *mundo);
 

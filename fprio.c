@@ -3,11 +3,11 @@
 #include "fprio.h"
 
 //basicamente definir uma prioriade pra fila (crescente)
-//se tiver a mesma, FIFO
+//se tiver a mesma, FiFO
 
 
 // cria uma nova fila, informando o número máximo de itens
-// Retorno: ponteiro para a fila criada ou NULL se erro.
+// retorno: ponteiro para a fila criada ou NULL se erro.
 struct fprio_t *fprio_cria (){
     struct fprio_t *fprio = (struct fprio_t *) malloc (sizeof(struct fprio_t));
 
@@ -21,44 +21,48 @@ struct fprio_t *fprio_cria (){
     return fprio;
 }
 
-// Libera todas as estruturas de dados da fila, inclusive os itens.
+// libera todas as estruturas de dados da fila, inclusive os itens.
 // Retorno: NULL.
 struct fprio_t *fprio_destroi (struct fprio_t *f){
     if (!f) return NULL;
+
     struct fpnodo_t *aux, *prox;
     aux = f->prim;
+
     while (aux) {
         prox = aux->prox;
+        free(aux->item);//faltava isso no leak do tp5
         free(aux);
         aux = prox;
     }
     free(f);
     return NULL;
 }
+
 //  insere um novo item na fila, 
 //  posicionado de acordo com o valor da prioridade informada
 int fprio_insere(struct fprio_t *f, void *item, int tipo, int prio) {
-    if (!f || !item) return -1; // Verifica se a fila ou o item são nulos
+    if (!f || !item) return -1; // verifica se a fila ou o item são nulos
 
-    // Verifica se o item já está na fila
+    // verifica se o item já está na fila
     struct fpnodo_t *atual = f->prim;
     while (atual != NULL) {
         if (atual->item == item) {
-            return -1; // Item já existe na fila
+            return -1; // item já existe na fila
         }
         atual = atual->prox;
     }
 
-    // Cria o novo nó
+    // cria o novo nó
     struct fpnodo_t *novo = (struct fpnodo_t *)malloc(sizeof(struct fpnodo_t));
-    if (!novo) return -1; // Erro ao alocar memória
+    if (!novo) return -1; // erro ao alocar memória
 
     novo->item = item;
     novo->tipo = tipo;
     novo->prio = prio;
     novo->prox = NULL;
 
-    // Insere o novo item na posição correta
+    // insere o novo item na posição correta
     if (f->prim == NULL || f->prim->prio > prio) {
         novo->prox = f->prim;
         f->prim = novo;
@@ -100,7 +104,7 @@ void fprio_imprime (struct fprio_t *f){
     while (atual) {
         printf("(%d %d)", atual->tipo, atual->prio);
         if (atual->prox) {
-            printf(" "); // Espaço entre os itens
+            printf(" "); // espaço entre os itens
         }
         atual = atual->prox;
     }
