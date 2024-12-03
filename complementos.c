@@ -7,6 +7,12 @@
 
 #define RUN 32
 
+
+int aleat(int min, int max)
+{
+    return rand() % (max - min + 1) + min;
+}
+
 void merge(int vetor[], int inicio, int meio, int fim) {
     int tam_esq = meio - inicio + 1; //calcula o tam do subvetor esquerdo
     int tam_dir = fim - meio; //calcula o tam do subvetor direito
@@ -149,7 +155,7 @@ int distancia_euclidiana(struct coordenadas *coord1, struct coordenadas *coord2)
 
 //como em todas as funções de eventos é necessário criar um evento e inserir na fila de prioridade
 //essa função foi criada para facilitar a leitura do código e manter ele mais limpo
-void CriaInsere(int tempo, int tipo, void* dado1, void* dado2, struct fprio_t *fprio){
+void CriaInsere(int tempo, int tipo, int* dado1, int* dado2, struct fprio_t *fprio){
     struct evento_t *evento = cria_evento(tempo, tipo, dado1, dado2);
     fprio_insere(fprio, evento, tipo, tempo);
 }

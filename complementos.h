@@ -18,8 +18,10 @@ int timsort(int vetor[], int tam);
 int distancia_euclidiana(struct coordenadas *coord1, struct coordenadas *coord2);
 
 // Função para criar e inserir na LEF
-void CriaInsere(int tempo, int tipo, void* dado1, void* dado2, struct fprio_t *fprio);
+void CriaInsere(int tempo, int tipo, int* dado1, int* dado2, struct fprio_t *fprio);
 
+//função pra aleatorizar
+int aleat(int min, int max);
 
 #endif
 
