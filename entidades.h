@@ -33,6 +33,7 @@ struct heroi
     int experiencia;
     int base_atual;
     struct conjunto *habilidades;
+    int status; //0 = vivo, 1 = morto
 };
 
 struct missao 
