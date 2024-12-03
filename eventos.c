@@ -3,8 +3,12 @@
 #include <time.h>
 #include "fprio.h"
 #include "lista.h"
+#include "fila.c"
 #include "conjunto.h"
 #include "eventos.h"
+#include "entidades.h"
+#include "mundo.h"
+#include "complementos.h"
 
 /*
 {
@@ -24,8 +28,43 @@ senão:
 }
 */
 void chega(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio){
+    h->base_atual = b->id;
 
+    if (b->lotacao > cjto_card(b->presentes) && fila_vazia(b->espera))
+    {
+        printf ("%6d: CHEGA  HEROI %2d BASE %d (%d/%d) \n", 
+                tempo, 
+                h->id, 
+                b->id, 
+                cjto_card(b->presentes), 
+                b->lotacao);
+
+        cjto_insere(b->presentes, h->id); 
+        
+        CriaInsere(tempo, TIPO_ENTRA, h, b, fprio);
+    }
+    else if (h->paciencia > 10 * fila_tamanho(b->espera)) 
+    {
+        printf("%6d: CHEGA  HEROI %2d BASE %d (%d/%d) ESPERA \n", 
+                tempo, 
+                h->id, 
+                b->id, 
+                cjto_card(b->presentes), 
+                b->lotacao);
+        CriaInsere(tempo, TIPO_ESPERA, h, b, fprio);
+    } 
+    else
+    {
+        printf("%6d: CHEGA  HEROI %2d BASE %d (%d/%d) DESISTE \n", 
+                tempo, 
+                h->id, 
+                b->id, 
+                cjto_card(b->presentes), 
+                b->lotacao);
+        CriaInsere(tempo, TIPO_DESISTE, h, b, fprio);
+    }
 }
+
 
 /*
 ESPERA (T, H, B):
@@ -33,9 +72,16 @@ ESPERA (T, H, B):
 adiciona H ao fim da fila de espera de B
 cria e insere na LEF o evento AVISA (agora, B)
 */
-void espera(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio){
-
+void espera(int tempo, struct heroi *heroi, struct base *base, struct fprio_t *fprio) {
+    enqueue(base->espera, heroi->id);
+    CriaInsere(tempo, TIPO_AVISA, base, NULL, fprio);
+    printf("%6d: ESPERA HEROI %2d BASE %d (%d) \n",
+            tempo, 
+            heroi->id, 
+            base->id, 
+            fila_tamanho(base->espera));
 }
+
 /*
 DESISTE (T, H, B):
 
@@ -43,7 +89,12 @@ escolhe uma base destino D aleatória
 cria e insere na LEF o evento VIAJA (agora, H, D)
 */
 void desiste(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio){
-
+    int destino = rand() % N_BASES;
+    CriaInsere(tempo, TIPO_VIAJA, h, destino, fprio);
+    printf("%6d: DESISTE HEROI %2d BASE %d \n",
+            tempo, 
+            h->id, 
+            b->id);
 }
 
 /*
@@ -55,7 +106,22 @@ enquanto houver vaga em B e houver heróis esperando na fila:
     cria e insere na LEF o evento ENTRA (agora, H', B)
 */
 void avisa(int tempo, struct base *b, struct fprio_t *fprio){
+    printf("%6d: AVISA PORTEIRO BASE %d (%d/%d) \n",
+            tempo,
+            b->id, 
+            cjto_card(b->presentes),
+            b->lotacao);
+    int heroi_id;
+    while (cjto_card(b->presentes) < b->lotacao && !fila_vazia(b->espera)){//enquanto houver vaga e fila de espera
+        int id = dequeue(b->espera, &heroi_id);//heroi_id passado como referencia pois dequeue retorna o valor
+        cjto_insere(b->presentes, heroi_id);
+        CriaInsere(tempo, TIPO_ENTRA, id, b, fprio);
 
+        printf("%6d: AVISA PORTEIRO BASE %d ADMITE %2d \n",
+                tempo,
+                b->id,
+                heroi_id);
+    }
 }
 
 /*
@@ -66,7 +132,18 @@ calcula TPB = tempo de permanência na base:
 cria e insere na LEF o evento SAI (agora + TPB, H, B)
 */
 void entra(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio){
+    int TPB = 15 + h->paciencia * (rand() % 20 + 1);
+    tempo += TPB;
+    CriaInsere(tempo, TIPO_SAI, h, b, fprio);
+    cjto_insere(b->presentes, h->id);
 
+    printf("%6d: ENTRA HEROI %2d BASE %d (%d/%d) TPB %d \n",
+            tempo,
+            h->id,
+            b->id,
+            cjto_card(b->presentes),
+            b->lotacao,
+            TPB);
 }
 
 /*
@@ -78,7 +155,17 @@ cria e insere na LEF o evento VIAJA (agora, H, D)
 cria e insere na LEF o evento AVISA (agora, B)
 */
 void sai(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio){
+    cjto_retira(b->presentes, h->id);
+    int destino = rand() % N_BASES;
+    CriaInsere(tempo, TIPO_VIAJA, h, destino, fprio);
+    CriaInsere(tempo, TIPO_AVISA, b, NULL, fprio);
 
+    printf("%6d: SAI HEROI %2d BASE %d (%d/%d) \n",
+            tempo,
+            h->id,
+            b->id,
+            cjto_card(b->presentes),
+            b->lotacao);
 }
 
 /*
@@ -89,8 +176,21 @@ calcula duração da viagem:
     duração = distância / velocidade de H
 cria e insere na LEF o evento CHEGA (agora + duração, H, D)
 */
-void viaja(int tempo, struct heroi *h, struct coordenadas *destino, struct fprio_t *fprio){
+void viaja(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio){
+    
+    struct base *destino = &mundo->bases[h->id];
+    
+    int dist = distancia_euclidiana(b->coord, destino->coord);
+    int duracao = dist / h->velocidade;
+    tempo += duracao;
+    CriaInsere(tempo, TIPO_CHEGA, h, b, fprio);
 
+    printf("%6d: VIAJA HEROI %2d BASE %d -> BASE %d (%d) \n",
+            tempo,
+            h->id,
+            h->base_atual,
+            b->id,
+            duracao);
 }
 
 /*
@@ -121,6 +221,9 @@ muda o status de H para morto
 cria e insere na LEF o evento AVISA (agora, B)
 */
 void morre(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio){
+    cjto_retira(b->presentes, h->id);
+    h->status = 1;
+    CriaInsere(tempo, TIPO_AVISA, b, NULL, fprio);
 
 }
 

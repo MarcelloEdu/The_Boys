@@ -90,7 +90,7 @@ calcula duração da viagem:
     duração = distância / velocidade de H
 cria e insere na LEF o evento CHEGA (agora + duração, H, D)
 */
-void viaja(int tempo, struct heroi *h, struct coordenadas *destino, struct fprio_t *fprio);
+void viaja(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio);
 
 /*
 MISSAO (T, M):
