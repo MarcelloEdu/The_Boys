@@ -5,9 +5,10 @@
 #include "entidades.h"
 #include "conjunto.h"
 #include "eventos.h"
+#include "complementos.h"
 
 // Função para criar um evento
-struct evento_t* cria_evento(int tempo, int tipo, void* dado1, void* dado2)
+struct evento_t* cria_evento(int tempo, int tipo, int* dado1, int* dado2)
 {
     struct evento_t* evento = malloc(sizeof(struct evento_t));
     if (evento == NULL) {
@@ -37,7 +38,7 @@ void inicia_mundo(struct mundo *mundo)
     mundo->missoes_cumpridas = 0;
     mundo->missoes_adiadas = 0;
     mundo->quant_missoes = N_MISSOES;
-    mundo->habilidades = cria_cjt(N_HABILIDADES);
+    mundo->habilidades = cjto_cria(N_HABILIDADES);
     mundo->eventos = fprio_cria();  // Usando fprio_t ao invés de LEF
 
     int tempo;
@@ -59,8 +60,7 @@ void inicia_mundo(struct mundo *mundo)
 
         // Cria o evento de chegada e insere na fila de prioridade
         // Passa o id do herói como dado1 e a base como dado2
-        struct evento_t *ev = cria_evento(tempo, TIPO_CHEGA, &mundo->herois[i], &mundo->bases[base]);
-        fprio_insere(mundo->eventos, ev, TIPO_CHEGA, tempo);
+        CriaInsere(tempo, TIPO_CHEGA, &mundo->herois[i], &mundo->bases[base], mundo->eventos);
     }
     
     // Inicializa as missões e insere eventos na fila de prioridade
@@ -70,19 +70,16 @@ void inicia_mundo(struct mundo *mundo)
         tempo = aleat(0, T_FIM);  // Define o tempo para a missão acontecer
         
         // Cria o evento de missão e insere na fila de prioridade
-        // Passa a missão como dado1 e o tempo como dado2
-        struct evento_t *ev = cria_evento(tempo, TIPO_MISSAO, &mundo->missoes[i], NULL);
-        fprio_insere(mundo->eventos, ev, TIPO_MISSAO, tempo);
+        CriaInsere(tempo, TIPO_MISSAO, &mundo->missoes[i], NULL, mundo->eventos);
         mundo->quant_missoes++;
     }
 
     // Cria o evento de fim e insere na fila de prioridade
-    struct evento_t *fim_ = cria_evento(T_FIM, TIPO_FIM, NULL, NULL);
-    fprio_insere(mundo->eventos, fim_, TIPO_FIM, T_FIM);
+    CriaInsere(T_FIM, TIPO_FIM, NULL, NULL, mundo->eventos);
 }
 
 // Função para imprimir o mundo
 void imprime_mundo(struct mundo *mundo)
 {
-    fprio_imprime(mundo->eventos);  // Supondo que fprio_imprime imprime os eventos da fila
+    fprio_imprime(mundo->eventos);
 }
