@@ -3,6 +3,11 @@
 #include <stdint.h>
 #include <math.h>
 #include "complementos.h"
+#include "eventos.h"
+#include "fprio.h"
+#include "entidades.h"
+#include "mundo.h"
+
 
 
 #define RUN 32
@@ -13,130 +18,82 @@ int aleat(int min, int max)
     return rand() % (max - min + 1) + min;
 }
 
-void merge(int vetor[], int inicio, int meio, int fim) {
-    int tam_esq = meio - inicio + 1; //calcula o tam do subvetor esquerdo
-    int tam_dir = fim - meio; //calcula o tam do subvetor direito
-
-    //Aloca memória para os subvetores esquerdo e direito
-    int *esq = (int *)malloc(tam_esq * sizeof(int));
-    int *dir = (int *)malloc(tam_dir * sizeof(int));
-    if (esq == NULL || dir == NULL) {
-        printf("Falha ao alocar memória para os subvetores\n");
-        exit(1);
+// Função para criar um evento
+// Recebe o tempo, o tipo do evento, e dois ponteiros para inteiros
+// que serão utilizados para passar os dados do evento
+// Retorna um ponteiro para o evento criado
+struct evento_t* cria_evento(int tempo, int tipo, void* dado1, void* dado2){
+    struct evento_t* evento = malloc(sizeof(struct evento_t));
+    if (evento == NULL) {
+        return NULL;
     }
 
-    //copia os elementos para os subvetores esquerdo e direito
-    for (int i = 0; i < tam_esq; i++)
-        esq[i] = vetor[inicio + i];
-    for (int j = 0; j < tam_dir; j++)
-        dir[j] = vetor[meio + 1 + j];
+    evento->tempo = tempo;
+    evento->tipo = tipo;
+    evento->dado1 = dado1;
+    evento->dado2 = dado2;
 
-    int i = 0;
-    int j = 0;
-    int k = inicio;
-
-    //Mescla os subvetores ordenados
-    while (i < tam_esq && j < tam_dir) {
-        if (esq[i] <= dir[j]) {
-            vetor[k] = esq[i];
-            i++;
-        } else {
-            vetor[k] = dir[j];
-            j++;
-        }
-        k++;
-    }
-
-    //copia os elementos restantes do subvetor esquerdo, se houver
-    while (i < tam_esq) {
-        vetor[k] = esq[i];
-        i++;
-        k++;
-    }
-
-    //copia os elementos restantes do subvetor direito, se houver
-    while (j < tam_dir) {
-        vetor[k] = dir[j];
-        j++;
-        k++;
-    }
-
-    //Libera a memória alocada para os subvetores
-    free(esq);
-    free(dir);
+    return evento;
 }
 
-int busca(int vetor[], int tam, int valor) {
-    int inicio = 0;
-    int fim = tam - 1; 
+// Função para destruir um evento e liberar a memória
+void destroi_evento(struct evento_t* evento)
+{
+    if (evento != NULL) {
+        free(evento);  // Libera a memória do evento
+    }
+}
+
+//função para particionar o vetor
+//escolhe um pivô e coloca os elementos menores à esquerda e os maiores à direita
+//custo = n
+int particionar(struct base *bases[], int inicio, int fim, const struct missao *m) 
+{
+    // Escolhe aleatoriamente o pivô
+    int aleatorio = aleat(inicio, fim);
+    struct base *pivo = bases[aleatorio];
     
-    while (inicio <= fim) {
-        int meio = (inicio + fim) / 2;
-        
-        if (vetor[meio] == valor) {
-            return meio;
-        }
-        
-        if (vetor[meio] < valor) {
-            inicio = meio + 1;
-        } else {
-            fim = meio - 1;
+    int i = (inicio - 1); // índice do menor elemento
+
+    for (int j = inicio; j <= fim - 1; j++) 
+    {
+        // Calcula a distância entre a missão e a base
+        int distPivo = distancia_euclidiana(pivo->coord, m->coordenadas);
+        int distBaseJ = distancia_euclidiana(bases[j]->coord, m->coordenadas);
+
+        if (distBaseJ <= distPivo) 
+        {
+            i++; // incrementa o índice do menor elemento
+            // Troca as bases
+            struct base *temp = bases[i];
+            bases[i] = bases[j];
+            bases[j] = temp;
         }
     }
-    return inicio; // Ponto de inserção
+    // Coloca o pivô na posição correta
+    struct base *temp = bases[i + 1];
+    bases[i + 1] = bases[fim];
+    bases[fim] = temp;
+
+    return (i + 1); // retorna o índice onde o pivô está agora
 }
 
-int inserir(int vetor[], int inicio, int fim) {
-    int posicao = busca(vetor, inicio + fim, vetor[fim]);
-    int i = fim;
 
-    while (i > posicao) {
-        trocar (&vetor[i], &vetor[i - 1]);
-        i -= 1;
-    }
-    return i - inicio;
-}
-
-void insertionSort(int vetor[], int tam) {
-    for (int i = 1; i < tam; i++) {
-        inserir(vetor, 0, i);
-    }
-}
-
-//TimSort
-//função hibrida que combina mergeSort e insertionSort
-//divide o vetor em runs e ordena cada run com insertionSort
-//mescla os runs adjacentes
-//custo = n*log(n)
-//desnecessário para esse trabalho pois os vetores não serão muito grandes
-//porém pensando se for usada para uma simulação maior ou em outro contexto
-//pode ser útil
-int timsort(int vetor[], int tam){
-
-    // Ordena cada run de tamanho RUN usando insertionSort
-    for (int i = 0; i < tam; i += RUN) {
-        int fim = i + RUN - 1;
-        if (fim >= tam) {
-            fim = tam - 1;
-        }
-        insertionSort(vetor + i, fim - i + 1); // Passa o subarray e o tamanho
-    }
-
-    // Mescla os runs adjacentes
-    for (int tamAtual = RUN; tamAtual < tam; tamAtual *= 2) {
-        for (int esquerda = 0; esquerda < tam; esquerda += 2 * tamAtual) {
-            int meio = esquerda + tamAtual - 1;
-            int direita = esquerda + 2 * tamAtual - 1;
-
-            if (meio >= tam) {
-                break;
-            }
-            if (direita >= tam) {
-                direita = tam - 1;
-            }
-
-            merge(vetor, esquerda, meio, direita);
-        }
+//função de "ordenação rápida" recursiva
+//escolhe um pivô, particiona o vetor e ordena os subvetores
+//custo = n*log(n)(melhor caso) ou n^2(pior caso)
+//o pior caso ocorre quando o vetor está ordenado ou quase ordenado
+//o melhor caso ocorre quando o pivô divide o vetor em duas partes iguais
+//escolhi fazer com pivo aleatório para evitar o pior caso
+void quicksort(struct base *bases[], int inicio, int fim, const struct missao *m) 
+{
+    if (inicio < fim) 
+    {
+        // Particiona as bases e obtém o índice do pivô
+        int pi = particionar(bases, inicio, fim, m);
+        // Ordena recursivamente as duas partes
+        quicksort(bases, inicio, pi - 1, m);
+        quicksort(bases, pi + 1, fim, m);
     }
 }
 
