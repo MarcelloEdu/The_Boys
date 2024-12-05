@@ -19,6 +19,7 @@ struct base
 {
     int id;
     int lotacao;
+    struct missao *missoes_cumpridas;
     struct conjunto *habilidades;
     struct conjunto *presentes;
     struct fila *espera;
@@ -43,10 +44,10 @@ struct missao
     int id;
     struct conjunto *habilidades;
     struct coordenadas *coordenadas;
+    int tentativas;
     int perigo;
 };
 
-int aleat(int min, int max);
 
 struct heroi inicia_heroi(struct heroi *heroi, int id);
 
