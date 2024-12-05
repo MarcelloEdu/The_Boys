@@ -27,7 +27,6 @@ struct mundo {
 };
 
 // Funções para criar, manipular e remover eventos
-struct evento_t* cria_evento(int tempo, int tipo, void* dado1, void* dado2);
 void destroi_evento(struct evento_t* evento);  // Função para destruir eventos
 
 // Funções para manipular o mundo

@@ -7,30 +7,6 @@
 #include "eventos.h"
 #include "complementos.h"
 
-// Função para criar um evento
-struct evento_t* cria_evento(int tempo, int tipo, int* dado1, int* dado2)
-{
-    struct evento_t* evento = malloc(sizeof(struct evento_t));
-    if (evento == NULL) {
-        return NULL;
-    }
-
-    evento->tempo = tempo;
-    evento->tipo = tipo;
-    evento->dado1 = dado1;
-    evento->dado2 = dado2;
-
-    return evento;
-}
-
-// Função para destruir um evento e liberar a memória
-void destroi_evento(struct evento_t* evento)
-{
-    if (evento != NULL) {
-        free(evento);  // Libera a memória do evento
-    }
-}
-
 // Função para inicializar o mundo
 void inicia_mundo(struct mundo *mundo)
 {
