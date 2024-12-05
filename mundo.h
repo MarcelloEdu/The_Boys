@@ -8,8 +8,8 @@
 struct evento_t {
     int tempo;      // Tempo em que o evento ocorre
     int tipo;       // Tipo do evento (CHEGA, MISSAO, FIM, etc.)
-    void* dado1;    // Dado associado ao evento (pode ser um ID de herói, por exemplo)
-    void* dado2;    // Segundo dado associado ao evento (pode ser um ID de missão ou outro dado)
+    int* dado1;    // Dado associado ao evento (pode ser um ID de herói, por exemplo)
+    int* dado2;    // Segundo dado associado ao evento (pode ser um ID de missão ou outro dado)
 };
 
 // Estrutura que representa o "mundo" do jogo
@@ -24,11 +24,11 @@ struct mundo {
     int missoes_cumpridas;
     int missoes_adiadas;
     int mortalidade;
+    int eventos_tratados;
 };
 
 // Funções para criar, manipular e remover eventos
 void destroi_evento(struct evento_t* evento);  // Função para destruir eventos
-
 // Funções para manipular o mundo
 void inicia_mundo(struct mundo *mundo);  // Função para inicializar o mundo
 void imprime_mundo(struct mundo *mundo);  // Função para imprimir o estado do mundo
