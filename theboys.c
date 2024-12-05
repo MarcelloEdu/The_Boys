@@ -6,15 +6,64 @@
 #include "fprio.h"
 #include "lista.h"
 #include "conjunto.h"
+#include "fila.h"
+#include "eventos.h"
+#include "entidades.h"
+#include "mundo.h"
+#include "complementos.h"
 
 int main ()
 {
-  // iniciar o mundo
+  struct mundo *mundo;
+  struct evento_t *ev;
 
-  // executar o laço de simulação
+  inicia_mundo(&mundo);
 
-  // destruir o mundo
+  while (mundo->relogio < T_FIM){
+    ev = fprio_retira(mundo->eventos, 0 , 0);
+    mundo->relogio = ev->tempo;
+    if(!ev)
+      break;
 
-  return (0) ;
+      switch(ev->tipo){
+            case TIPO_CHEGA: 
+                chega(mundo->relogio, &mundo->herois[ev->dado1], &mundo->bases[ev->dado2], &mundo, mundo->eventos);
+                break;
+
+            case TIPO_ESPERA: 
+                espera(mundo->relogio, &mundo->herois[ev->dado1], &mundo->bases[ev->dado2], &mundo, mundo->eventos);
+                break;
+
+            case TIPO_DESISTE: 
+                desiste(mundo->relogio, &mundo->herois[ev->dado1], &mundo->bases[ev->dado2], &mundo, mundo->eventos);
+                break;
+
+            case TIPO_AVISA: 
+                avisa(mundo->relogio, &mundo->bases[ev->dado1], &mundo, mundo->eventos);
+                break;
+
+            case TIPO_ENTRA: 
+                entra(mundo->relogio, &mundo->herois[ev->dado1], &mundo->bases[ev->dado2], &mundo, mundo->eventos);
+                break;
+
+            case TIPO_SAI: 
+                sai(mundo->relogio, &mundo->herois[ev->dado1], &mundo->bases[ev->dado2], &mundo, mundo->eventos);
+                break;
+
+            case TIPO_VIAJA: 
+                viaja(mundo->relogio, &mundo->herois[ev->dado1], &mundo->bases[ev->dado2], &mundo, mundo->eventos);
+                break;
+
+            case TIPO_MISSAO:
+                missao(mundo->relogio, &mundo->missoes[ev->dado1], &mundo, mundo->eventos);
+                break;
+
+            case TIPO_FIM:
+                fim(&mundo);
+                break;
+        }
+
+        destroi_evento(ev);
+    }
+    return 0;
 }
-
