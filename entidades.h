@@ -19,6 +19,7 @@ struct base
 {
     int id;
     int lotacao;
+    struct conjunto *habilidades;
     struct conjunto *presentes;
     struct fila *espera;
     struct coordenadas *coord;
@@ -31,7 +32,7 @@ struct heroi
     int paciencia;
     int velocidade;
     int experiencia;
-    int base_atual;
+    struct base *base_atual;
     struct base *base_destino;
     struct conjunto *habilidades;
     int status; //0 = vivo, 1 = morto

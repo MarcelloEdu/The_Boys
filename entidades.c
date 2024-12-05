@@ -13,6 +13,7 @@ struct base inicia_base(struct base *base, int id)
     base->lotacao = aleat(3, 10);
     base->presentes = cria_cjt(base->lotacao);
     base->espera = fila_cria();
+    base->habilidades = cjto_cria(N_HABILIDADES);
     
     base->coord = malloc(sizeof(struct coordenadas));
     base->coord->x = aleat(0, TAMANHO_MUNDO -1);
