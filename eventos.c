@@ -89,8 +89,8 @@ escolhe uma base destino D aleatória
 cria e insere na LEF o evento VIAJA (agora, H, D)
 */
 void desiste(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio){
-    int destino = rand() % N_BASES;
-    CriaInsere(tempo, TIPO_VIAJA, h, destino, fprio);
+    h->base_destino = rand() % N_BASES;
+    CriaInsere(tempo, TIPO_VIAJA, h, b, fprio);
     printf("%6d: DESISTE HEROI %2d BASE %d \n",
             tempo, 
             h->id, 
@@ -156,8 +156,8 @@ cria e insere na LEF o evento AVISA (agora, B)
 */
 void sai(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio){
     cjto_retira(b->presentes, h->id);
-    int destino = rand() % N_BASES;
-    CriaInsere(tempo, TIPO_VIAJA, h, destino, fprio);
+    h->base_destino = rand() % N_BASES;
+    CriaInsere(tempo, TIPO_VIAJA, h, b, fprio);
     CriaInsere(tempo, TIPO_AVISA, b, NULL, fprio);
 
     printf("%6d: SAI HEROI %2d BASE %d (%d/%d) \n",
@@ -178,11 +178,10 @@ cria e insere na LEF o evento CHEGA (agora + duração, H, D)
 */
 void viaja(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio){
     
-    struct base *destino = &mundo->bases[h->id];
-    
-    int dist = distancia_euclidiana(b->coord, destino->coord);
+    int dist = distancia_euclidiana(b->coord, h->base_destino->coord);
     int duracao = dist / h->velocidade;
     tempo += duracao;
+    h->base_atual = h->base_destino->id;
     CriaInsere(tempo, TIPO_CHEGA, h, b, fprio);
 
     printf("%6d: VIAJA HEROI %2d BASE %d -> BASE %d (%d) \n",

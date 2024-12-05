@@ -32,6 +32,7 @@ struct heroi
     int velocidade;
     int experiencia;
     int base_atual;
+    struct base *base_destino;
     struct conjunto *habilidades;
     int status; //0 = vivo, 1 = morto
 };
