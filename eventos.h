@@ -36,7 +36,7 @@ senão:
     cria e insere na LEF o evento DESISTE (agora, H, B)
 }
 */
-void chega(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio);
+void chega(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio);
 
 /*
 ESPERA (T, H, B):
@@ -44,15 +44,14 @@ ESPERA (T, H, B):
 adiciona H ao fim da fila de espera de B
 cria e insere na LEF o evento AVISA (agora, B)
 */
-void espera(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio);
+void espera(int tempo, struct heroi *heroi, struct base *base, struct mundo *mundo, struct fprio_t *fprio);
 /*
 DESISTE (T, H, B):
 
 escolhe uma base destino D aleatória
 cria e insere na LEF o evento VIAJA (agora, H, D)
 */
-void desiste(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio);
-
+void desiste(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio);
 /*
 AVISA (T, B):
 
@@ -61,7 +60,7 @@ enquanto houver vaga em B e houver heróis esperando na fila:
     adiciona H' ao conjunto de heróis presentes em B
     cria e insere na LEF o evento ENTRA (agora, H', B)
 */
-void avisa(int tempo, struct base *b, struct fprio_t *fprio);
+void avisa(int tempo, struct base *b, struct mundo *mundo, struct fprio_t *fprio);
 
 /*
 ENTRA (T, H, B):
@@ -70,7 +69,7 @@ calcula TPB = tempo de permanência na base:
     TPB = 15 + paciência de H * aleatório [1...20]
 cria e insere na LEF o evento SAI (agora + TPB, H, B)
 */
-void entra(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio);
+void entra(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio);
 
 /*
 SAI (T, H, B):
@@ -80,8 +79,7 @@ escolhe uma base destino D aleatória
 cria e insere na LEF o evento VIAJA (agora, H, D)
 cria e insere na LEF o evento AVISA (agora, B)
 */
-void sai(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio);
-
+void sai(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio);
 /*
 VIAJA (T, H, D):
 
@@ -91,7 +89,6 @@ calcula duração da viagem:
 cria e insere na LEF o evento CHEGA (agora + duração, H, D)
 */
 void viaja(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio);
-
 /*
 MISSAO (T, M):
 
@@ -109,7 +106,6 @@ senão:
     cria e insere na LEF o evento MISSAO (T + 24*60, M) para o dia seguinte
 */
 void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fprio);
-
 /*
 MORRE (T, H, B):
 
@@ -117,8 +113,7 @@ retira H do conjunto de heróis presentes em B
 muda o status de H para morto 
 cria e insere na LEF o evento AVISA (agora, B)
 */
-void morre(int tempo, struct heroi *h, struct base *b, struct fprio_t *fprio); 
-
+void morre(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio);
 /*
 FIM (T):
   encerra a simulação
@@ -126,7 +121,7 @@ FIM (T):
   apresenta estatísticas das bases
   apresenta estatísticas das missões
 */
-void fim(int tempo, struct fprio_t *fprio);
+void fim(int tempo, struct mundo *mundo, struct fprio_t *fprio);
 
 
 #endif
