@@ -1,28 +1,27 @@
-# makefile The Boys
-# Carlos Maziero - DINF/UFPR, 2024/2
+# Makefile The Boys
+# Marcello Eduardo, 2024/2
 
 CC      = gcc
 CFLAGS  = -Wall -Wextra -Werror -g -std=c99
 LDLIBS  = -lm
 MAIN    = theboys
-ENTREGA = $(MAIN)
 
-# lista de arquivos de cabeçalho (a completar)
-HDR = lista.h fprio.h conjunto.h
+# lista de arquivos de cabeçalho
+HDR = lista.h fprio.h conjunto.h entidades.h eventos.h fila.h mundo.h complementos.h
 
-# lista de arquivos-objeto (a completar)
-# não inclua conjunto.o, senão ele será removido com "make clean"
-OBJ = lista.o fprio.o theboys.o
+# lista de arquivos-objeto
+OBJ = lista.o fprio.o entidades.o eventos.o fila.o mundo.o complementos.o theboys.o
+
+# conjunto.o é precompilado, adicionado diretamente às dependências
+EXTERNAL_OBJ = conjunto.o
 
 # construir o executável
-$(MAIN): $(MAIN).o $(OBJ) conjunto.o
+$(MAIN): $(OBJ) $(EXTERNAL_OBJ)
+	$(CC) $(CFLAGS) -o $(MAIN) $(OBJ) $(EXTERNAL_OBJ) $(LDLIBS)
 
-# construir os arquivos-objeto (a completar)
-$(MAIN).o: $(MAIN).c $(HDR)
-
-# construir os TADs
-lista.o: lista.c lista.h
-fprio.o: fprio.c fprio.h
+# regras para construir os arquivos-objeto
+%.o: %.c $(HDR)
+	$(CC) $(CFLAGS) -c $<
 
 # executar
 run: $(MAIN)
@@ -32,16 +31,15 @@ run: $(MAIN)
 valgrind: $(MAIN)
 	valgrind --leak-check=full --track-origins=yes ./$(MAIN)
 
-# gerar arquivo TGZ para entregar
+# gerar arquivo TGZ para entrega
 tgz: clean
-	-mkdir -p /tmp/$(USER)/$(ENTREGA)
-	chmod 0700 /tmp/$(USER)/$(ENTREGA)
-	cp *.c *.h makefile /tmp/$(USER)/$(ENTREGA)
-	tar czvf $(ENTREGA).tgz -C /tmp/$(USER) $(ENTREGA)
+	-mkdir -p /tmp/$(USER)/$(MAIN)
+	chmod 0700 /tmp/$(USER)/$(MAIN)
+	cp *.c *.h makefile /tmp/$(USER)/$(MAIN)
+	tar czvf $(MAIN).tgz -C /tmp/$(USER) $(MAIN)
 	rm -rf /tmp/$(USER)
-	@echo "Arquivo $(ENTREGA).tgz criado para entrega"
+	@echo "Arquivo $(MAIN).tgz criado para entrega"
 
 # limpar arquivos temporários
 clean:
-	rm -f *~ $(OBJ) $(MAIN) /tmp/$(USER)/$(ENTREGA) $(ENTREGA).tgz
-
+	rm -f *~ $(OBJ) $(MAIN) $(MAIN).tgz
