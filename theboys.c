@@ -12,58 +12,63 @@
 #include "mundo.h"
 #include "complementos.h"
 
-int main ()
-{
-  struct mundo *mundo;
-  struct evento_t *ev;
+int main() {
+    struct mundo mundo;
+    struct evento_t *ev;
 
-  inicia_mundo(&mundo);
+    inicia_mundo(&mundo);
 
-  while (mundo->relogio < T_FIM){
-    ev = fprio_retira(mundo->eventos, 0 , 0);
-    mundo->relogio = ev->tempo;
-    if(!ev)
-      break;
+    while (mundo.relogio < T_FIM) {
+        ev = (struct evento_t *)fprio_retira(mundo.eventos, NULL, NULL); // Realiza o cast adequado
+        
+        if (!ev)
+            break;  // Verifica se o evento é nulo antes de acessá-lo
 
-      switch(ev->tipo){
-            case TIPO_CHEGA: 
-                chega(mundo->relogio, &mundo->herois[ev->dado1], &mundo->bases[ev->dado2], &mundo, mundo->eventos);
+        mundo.relogio = ev->tempo;
+
+        switch (ev->tipo) {
+            case TIPO_CHEGA:
+                chega(mundo.relogio, &mundo.herois[ev->dado1], &mundo.bases[ev->dado2], &mundo, mundo.eventos);
                 break;
 
-            case TIPO_ESPERA: 
-                espera(mundo->relogio, &mundo->herois[ev->dado1], &mundo->bases[ev->dado2], &mundo, mundo->eventos);
+            case TIPO_ESPERA:
+                espera(mundo.relogio, &mundo.herois[ev->dado1], &mundo.bases[ev->dado2], &mundo, mundo.eventos);
                 break;
 
-            case TIPO_DESISTE: 
-                desiste(mundo->relogio, &mundo->herois[ev->dado1], &mundo->bases[ev->dado2], &mundo, mundo->eventos);
+            case TIPO_DESISTE:
+                desiste(mundo.relogio, &mundo.herois[ev->dado1], &mundo.bases[ev->dado2], &mundo, mundo.eventos);
                 break;
 
-            case TIPO_AVISA: 
-                avisa(mundo->relogio, &mundo->bases[ev->dado1], &mundo, mundo->eventos);
+            case TIPO_AVISA:
+                avisa(mundo.relogio, &mundo.bases[ev->dado1], &mundo, mundo.eventos);
                 break;
 
-            case TIPO_ENTRA: 
-                entra(mundo->relogio, &mundo->herois[ev->dado1], &mundo->bases[ev->dado2], &mundo, mundo->eventos);
+            case TIPO_ENTRA:
+                entra(mundo.relogio, &mundo.herois[ev->dado1], &mundo.bases[ev->dado2], &mundo, mundo.eventos);
                 break;
 
-            case TIPO_SAI: 
-                sai(mundo->relogio, &mundo->herois[ev->dado1], &mundo->bases[ev->dado2], &mundo, mundo->eventos);
+            case TIPO_SAI:
+                sai(mundo.relogio, &mundo.herois[ev->dado1], &mundo.bases[ev->dado2], &mundo, mundo.eventos);
                 break;
 
-            case TIPO_VIAJA: 
-                viaja(mundo->relogio, &mundo->herois[ev->dado1], &mundo->bases[ev->dado2], &mundo, mundo->eventos);
+            case TIPO_VIAJA:
+                viaja(mundo.relogio, &mundo.herois[ev->dado1], &mundo.bases[ev->dado2], &mundo, mundo.eventos);
                 break;
 
             case TIPO_MISSAO:
-                missao(mundo->relogio, &mundo->missoes[ev->dado1], &mundo, mundo->eventos);
+                missao(mundo.relogio, &mundo.missoes[ev->dado1], &mundo, mundo.eventos);
                 break;
 
             case TIPO_FIM:
                 fim(&mundo);
                 break;
+
+            default:
+                fprintf(stderr, "Evento desconhecido: %d\n", ev->tipo);
         }
 
         destroi_evento(ev);
     }
+
     return 0;
 }
