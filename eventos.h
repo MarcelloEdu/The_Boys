@@ -121,7 +121,7 @@ FIM (T):
   apresenta estatísticas das bases
   apresenta estatísticas das missões
 */
-void fim(int tempo, struct mundo *mundo, struct fprio_t *fprio);
+void fim(struct mundo *mundo);
 
 
 #endif
