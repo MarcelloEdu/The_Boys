@@ -16,6 +16,15 @@ void inicia_mundo(struct mundo *mundo)
     mundo->quant_missoes = N_MISSOES;
     mundo->habilidades = cjto_cria(N_HABILIDADES);
     mundo->eventos = fprio_cria();  // Usando fprio_t ao invés de LEF
+    
+    mundo->tentativas_min = mundo->missoes->tentativas->tentativas;
+    mundo->tentativas_max = mundo->missoes->tentativas_max;
+
+    mundo = malloc(sizeof(struct mundo));
+    if (!mundo) {
+        fprintf(stderr, "Erro: falha ao alocar memória para o mundo.\n");
+        exit(EXIT_FAILURE);
+    }
 
     int tempo;
     int i;
