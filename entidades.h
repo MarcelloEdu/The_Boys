@@ -19,9 +19,9 @@ struct base
 {
     int id;
     int lotacao;
-    struct missao *missoes_cumpridas;
-    struct conjunto *habilidades;
-    struct conjunto *presentes;
+    int missoes_cumpridas;
+    struct cjto_t *habilidades;
+    struct cjto_t *presentes;
     struct fila *espera;
     struct coordenadas *coord;
 };
@@ -35,16 +35,18 @@ struct heroi
     int experiencia;
     struct base *base_atual;
     struct base *base_destino;
-    struct conjunto *habilidades;
+    struct cjto_t *habilidades;
     int status; //0 = vivo, 1 = morto
 };
 
 struct missao 
 {
     int id;
-    struct conjunto *habilidades;
+    struct cjto_t *habilidades;
     struct coordenadas *coordenadas;
     int tentativas;
+    int adiamentos;
+    int tentativas_max;
     int perigo;
 };
 

@@ -112,7 +112,7 @@ int distancia_euclidiana(struct coordenadas *coord1, struct coordenadas *coord2)
 
 //como em todas as funções de eventos é necessário criar um evento e inserir na fila de prioridade
 //essa função foi criada para facilitar a leitura do código e manter ele mais limpo
-void CriaInsere(int tempo, int tipo, int* dado1, int* dado2, struct fprio_t *fprio){
+void CriaInsere(int tempo, int tipo, void* dado1, void* dado2, struct fprio_t *fprio){
     struct evento_t *evento = cria_evento(tempo, tipo, dado1, dado2);
     fprio_insere(fprio, evento, tipo, tempo);
 }
