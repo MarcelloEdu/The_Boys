@@ -12,39 +12,35 @@
 
 
 void chega(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio){
-    
     if (h->base_atual->id == b->id) {
         // Evita que um herói já presente na base seja processado novamente.
         return;
     }
 
-    if(cjto_card(b->presentes) < b->lotacao && fila_vazia(b->espera)){
-        CriaInsere(tempo, TIPO_ENTRA, h->id, b->id, fprio);
-        mundo->eventos_tratados++;
-    }
-    else if (h->paciencia > 10 * fila_tamanho(b->espera)){
-        enqueue(b->espera, h->id);
-        printf("%6d: CHEGA  HEROI %2d BASE %d (%d/%d) ESPERA \n", 
-                tempo, 
-                h->id, 
-                b->id, 
-                cjto_card(b->presentes), 
-                b->lotacao);
+    h->base_atual->id = b->id;
+
+
+    if (cjto_card(b->presentes) < b->lotacao && fila_vazia(b->espera)) {
+        //espera=true
         CriaInsere(tempo, TIPO_ESPERA, h->id, b->id, fprio);
         mundo->eventos_tratados++;
-    } 
-    else
+    }else
     {
-        printf("%6d: CHEGA  HEROI %2d BASE %d (%d/%d) DESISTE \n", 
-                tempo, 
-                h->id, 
-                b->id, 
-                cjto_card(b->presentes), 
-                b->lotacao);
-        CriaInsere(tempo, TIPO_DESISTE, h->id, b->id, fprio);
-        mundo->eventos_tratados++;
+        //espera =  (paciência de H) > (10 * tamanho da fila em B)
+        if(h->paciencia > 10 * fila_tamanho(b->espera))
+        {
+            CriaInsere(tempo, TIPO_ESPERA, h->id, b->id, fprio);
+            mundo->eventos_tratados++;
+        }
+        else
+        {
+            CriaInsere(tempo, TIPO_DESISTE, h->id, b->id, fprio);
+            mundo->eventos_tratados++;
+        }
     }
+
 }
+
 
 void espera(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio) {
     if (!fila_contem(b->espera, h->id)) {
@@ -178,7 +174,7 @@ void viaja(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, stru
             tempo + duracao);
 }
 
-void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fprio){
+void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fprio){ 
     
     struct base *bases_aptas[N_BASES];//vetor de bases aptas a cumprir a missão
     int aptas = 0;
@@ -250,7 +246,7 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
 
 
     cjto_imprime(bases_aptas[BMP]->habilidades);
-    printf("] \n");
+    printf(" ] \n");
 
 
     bases_aptas[BMP]->missoes_cumpridas++;               //atualiza missões cumpridas
