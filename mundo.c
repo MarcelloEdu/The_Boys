@@ -10,58 +10,57 @@
 // Função para inicializar o mundo
 void inicia_mundo(struct mundo *mundo)
 {
+    // Não alocar memória para 'mundo' aqui, já que foi alocado no 'main'
+    // Inicialize os campos diretamente
     mundo->relogio = T_INICIO;
     mundo->missoes_cumpridas = 0;
     mundo->missoes_adiadas = 0;
     mundo->quant_missoes = N_MISSOES;
     mundo->habilidades = cjto_cria(N_HABILIDADES);
-    mundo->eventos = fprio_cria();  // Usando fprio_t ao invés de LEF
-    
-    mundo->tentativas_min = mundo->missoes->tentativas->tentativas;
-    mundo->tentativas_max = mundo->missoes->tentativas_max;
-
-    mundo = malloc(sizeof(struct mundo));
-    if (!mundo) {
-        fprintf(stderr, "Erro: falha ao alocar memória para o mundo.\n");
-        exit(EXIT_FAILURE);
+    if (mundo->habilidades == NULL) {
+        fprintf(stderr, "Erro: Falha na alocação de habilidades.\n");
+        return;
+    }
+    mundo->eventos = fprio_cria();
+    if (mundo->eventos == NULL) {
+        fprintf(stderr, "Erro: Falha na alocação de eventos.\n");
+        return;
     }
 
     int tempo;
     int i;
 
     // Inicializa as bases
-    for (i = 0; i < N_BASES; i++)
-    {
+    for (i = 0; i < N_BASES; i++) {
         inicia_base(&mundo->bases[i], i);
     }
 
     // Inicializa os heróis e insere eventos na fila de prioridade
     int base;
-    for (i = 0; i < N_HEROIS; i++)
-    {        
+    for (i = 0; i < N_HEROIS; i++) {        
         base = aleat(0, N_BASES - 1);
         tempo = aleat(0, 4320);  // Define o tempo de chegada do herói
         inicia_heroi(&mundo->herois[i], i);
 
         // Cria o evento de chegada e insere na fila de prioridade
         // Passa o id do herói como dado1 e a base como dado2
-        CriaInsere(tempo, TIPO_CHEGA, &mundo->herois[i], &mundo->bases[base], mundo->eventos);
+        CriaInsere(tempo, TIPO_CHEGA, mundo->herois[i].id, mundo->bases[base].id, mundo->eventos);
     }
     
     // Inicializa as missões e insere eventos na fila de prioridade
-    for (i = 0; i < N_MISSOES; i++)
-    {
+    for (i = 0; i < N_MISSOES; i++) {
         inicia_missao(&mundo->missoes[i], i);
         tempo = aleat(0, T_FIM);  // Define o tempo para a missão acontecer
         
         // Cria o evento de missão e insere na fila de prioridade
-        CriaInsere(tempo, TIPO_MISSAO, &mundo->missoes[i], NULL, mundo->eventos);
+        CriaInsere(tempo, TIPO_MISSAO, mundo->missoes[i].id, -1, mundo->eventos);
         mundo->quant_missoes++;
     }
 
     // Cria o evento de fim e insere na fila de prioridade
-    CriaInsere(T_FIM, TIPO_FIM, NULL, NULL, mundo->eventos);
+    CriaInsere(T_FIM, TIPO_FIM, -1, -1, mundo->eventos);
 }
+
 
 // Função para imprimir o mundo
 void imprime_mundo(struct mundo *mundo)

@@ -17,8 +17,6 @@ struct mundo {
     struct heroi herois[N_HEROIS];
     struct base bases[N_BASES];
     struct missao missoes[N_MISSOES];
-    struct missao tentativas_min;
-    struct missao tentativas_max;
     struct cjto_t *habilidades;
     struct fprio_t *eventos;
     int quant_missoes;

@@ -85,6 +85,24 @@ int fila_vazia (struct fila *fila)
     return fila->ini == NULL;
 }
 
+int fila_contem(struct fila *fila, int dado)
+{
+    if (fila == NULL || fila->ini == NULL) {
+        return 0; // Fila inexistente ou vazia
+    }
+
+    struct nodo *atual = fila->ini;
+    while (atual != NULL) {
+        if (atual->chave == dado) {
+            return 1; // Elemento encontrado
+        }
+        atual = atual->prox; // Avança para o próximo nó
+    }
+
+    return 0; // Elemento não encontrado
+}
+
+
 void fila_imprime (struct fila *fila)
 {
     struct nodo *aux = fila->ini;

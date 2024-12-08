@@ -42,7 +42,6 @@ struct fprio_t *fprio_destroi (struct fprio_t *f){
 //  insere um novo item na fila, 
 //  posicionado de acordo com o valor da prioridade informada
 int fprio_insere(struct fprio_t *f, void *item, int tipo, int prio) {
-    if (!f || !item) return -1; // verifica se a fila ou o item são nulos
 
     // verifica se o item já está na fila
     struct fpnodo_t *atual = f->prim;

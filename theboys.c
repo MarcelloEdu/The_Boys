@@ -15,16 +15,16 @@
 int main() {
     struct mundo mundo;
     struct evento_t *ev;
-
     inicia_mundo(&mundo);
 
     while (mundo.relogio < T_FIM) {
-        ev = (struct evento_t *)fprio_retira(mundo.eventos, NULL, NULL); // Realiza o cast adequado
-        
-        if (!ev)
-            break;  // Verifica se o evento é nulo antes de acessá-lo
+        int tipo_evento, prio_evento;
+        ev = fprio_retira(mundo.eventos, &tipo_evento, &prio_evento);
 
         mundo.relogio = ev->tempo;
+
+        if (!ev)
+            break;  // Se o evento for NULL, sai do loop
 
         switch (ev->tipo) {
             case TIPO_CHEGA:

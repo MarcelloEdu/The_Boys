@@ -50,6 +50,8 @@ int fila_tamanho (struct fila *fila);
 /* Retorna 1 se fila vazia, 0 em caso contrario. */ 
 int fila_vazia (struct fila *fila);
 
+int fila_contem(struct fila *fila, int dado);
+
 /* Imprime a fila no formato "[ e1 e2 ... en ]" 
  * Se a fila for vazia imprime "[ ]" */
 void fila_imprime (struct fila *fila);

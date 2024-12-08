@@ -22,7 +22,7 @@ int aleat(int min, int max)
 // Recebe o tempo, o tipo do evento, e dois ponteiros para inteiros
 // que serão utilizados para passar os dados do evento
 // Retorna um ponteiro para o evento criado
-struct evento_t* cria_evento(int tempo, int tipo, void* dado1, void* dado2){
+struct evento_t* cria_evento(int tempo, int tipo, int dado1, int dado2){
     struct evento_t* evento = malloc(sizeof(struct evento_t));
     if (evento == NULL) {
         return NULL;
@@ -104,6 +104,11 @@ void quicksort(struct base *bases[], int inicio, int fim, const struct missao *m
 // que será calculada com essa função
 // e ordenada com o timsort
 int distancia_euclidiana(struct coordenadas *coord1, struct coordenadas *coord2){
+        if (!coord1 || !coord2) {
+        fprintf(stderr, "Erro: coordenadas inválidas.\n");
+        return -1;  // Ou outro valor que indique erro
+    }
+
     int x = coord1->x - coord2->x;
     int y = coord1->y - coord2->y;
 
@@ -112,7 +117,7 @@ int distancia_euclidiana(struct coordenadas *coord1, struct coordenadas *coord2)
 
 //como em todas as funções de eventos é necessário criar um evento e inserir na fila de prioridade
 //essa função foi criada para facilitar a leitura do código e manter ele mais limpo
-void CriaInsere(int tempo, int tipo, void* dado1, void* dado2, struct fprio_t *fprio){
+void CriaInsere(int tempo, int tipo, int dado1, int dado2, struct fprio_t *fprio){
     struct evento_t *evento = cria_evento(tempo, tipo, dado1, dado2);
     fprio_insere(fprio, evento, tipo, tempo);
 }

@@ -1,8 +1,9 @@
 #ifndef ENTIDADES_H
 #define ENTIDADES_H
 
+
 #define T_INICIO 0
-#define T_FIM 10000
+#define T_FIM 525600
 #define N_HABILIDADES 10
 #define TAMANHO_MUNDO 20000
 #define N_HEROIS (N_HABILIDADES * 5)
@@ -45,11 +46,10 @@ struct missao
     struct cjto_t *habilidades;
     struct coordenadas *coordenadas;
     int tentativas;
-    int adiamentos;
     int tentativas_max;
+    int tentativas_min;
     int perigo;
 };
-
 
 struct heroi inicia_heroi(struct heroi *heroi, int id);
 
