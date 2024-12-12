@@ -81,6 +81,7 @@ void desiste(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, st
 }
 
 void avisa(int tempo, struct base *b, struct mundo *mundo, struct fprio_t *fprio){
+
     int heroi_id = mundo->herois[0].id;
     while (cjto_card(b->presentes) < b->lotacao && !fila_vazia(b->espera)){//enquanto houver vaga e fila de espera
 
@@ -92,7 +93,7 @@ void avisa(int tempo, struct base *b, struct mundo *mundo, struct fprio_t *fprio
                 cjto_card(b->presentes),
                 b->lotacao);
             
-        cjto_imprime(b->presentes);
+        fila_imprime(b->espera);
         printf("] \n");
     
 
@@ -110,6 +111,9 @@ void avisa(int tempo, struct base *b, struct mundo *mundo, struct fprio_t *fprio
 }
 
 void entra(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio){
+
+    if(h->status == 1)
+        return;
 
     h->base_atual->id = b->id;//atualiza base atual do heroi
 
@@ -136,18 +140,32 @@ void entra(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, stru
 
 void sai(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio) {
 
-    /* Verificação para retirar habilidades da base, mas só se não houver duplicatas de outros heróis */
-    for (int i = 0; i < N_HABILIDADES; i++) {  // para cada habilidade
-        if (cjto_pertence(b->presentes, i) && i != h->id) {  // se a habilidade pertence à base e não é a do herói
-            if (!(cjto_contem(h->habilidades, mundo->herois[i].habilidades))) {  // se a habilidade não pertence a outro herói que ainda está na base
-                for (int j = 0; j < N_HABILIDADES; j++) {  // para cada habilidade
-                    if (cjto_pertence(h->habilidades, j) && cjto_pertence(mundo->herois[i].habilidades, j)) {  // se a habilidade do herói for a mesma do herói que continua na base
-                        cjto_retira(b->habilidades, j);  // retira a habilidade da base
-                    }
-                }
-            }
+    // /* Verificação para retirar habilidades da base, mas só se não houver duplicatas de outros heróis */
+    // for (int i = 0; i < N_HABILIDADES; i++) {  // para cada habilidade
+    //     if (cjto_pertence(b->presentes, i) && i != h->id) {  // se a habilidade pertence à base e não é a do herói
+    //         if (!(cjto_contem(h->habilidades, mundo->herois[i].habilidades))) {  // se a habilidade não pertence a outro herói que ainda está na base
+    //             for (int j = 0; j < N_HABILIDADES; j++) {  // para cada habilidade
+    //                 if (cjto_pertence(h->habilidades, j) && cjto_pertence(mundo->herois[i].habilidades, j)) {  // se a habilidade do herói for a mesma do herói que continua na base
+    //                     cjto_retira(b->habilidades, j);  // retira a habilidade da base
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+    struct cjto_t *novo_habilidades = cjto_cria(N_HABILIDADES);
+
+    for(int i = 0; i < N_HEROIS; i++){    
+        
+        if(i != h->id && cjto_pertence(b->presentes, i)){
+            novo_habilidades = cjto_uniao(novo_habilidades, mundo->herois[i].habilidades);
         }
     }
+
+    b->habilidades = novo_habilidades;
+
+    if(h->status == 1)
+        return;
 
     // Remover o herói do conjunto de presentes da base
     cjto_retira(b->presentes, h->id);
@@ -172,6 +190,9 @@ void sai(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct
 
 void viaja(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio){
     
+    if(h->status == 1)
+        return;
+
     int dist = distancia_euclidiana(b->coord, h->base_destino->coord);
     int duracao = dist / h->velocidade;
 
@@ -209,45 +230,45 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
     printf("] \n");
 
 
-    printf("%6d: MISSAO %d BASE %d DIST %d HEROIS [" ,
-            tempo,
-            m->id,
-            mundo->bases->id,
-            distancia_euclidiana(mundo->bases->coord, m->coordenadas));
+    // printf("%6d: MISSAO %d BASE %d DIST %d HEROIS [" ,
+    //         tempo,
+    //         m->id,
+    //         mundo->bases->id,
+    //         distancia_euclidiana(mundo->bases->coord, m->coordenadas));
 
-    cjto_imprime(mundo->bases->habilidades);
-    printf("] \n");
-/*     
-    for(int i = 0; i < N_HEROIS; i++){
-        struct heroi *h = &mundo->herois[i];
-        printf("%6d: MISSAO %d HAB HEROI %2d: [",
-                tempo,
-                m->id,
-                h->id);
-        cjto_imprime(h->habilidades);
-        printf("] \n");
-    }
-*/
+    // cjto_imprime(mundo->bases->presentes);
+    // printf("] \n");
+
+
+    // for(int i = 0; i < N_HEROIS; i++){
+    //     struct heroi *h = &mundo->herois[i];
+    //     printf("%6d: MISSAO %d HAB HEROI %2d: [",
+    //             tempo,
+    //             m->id,
+    //             h->id);
+    //     cjto_imprime(h->habilidades);
+    //     printf("] \n");
+    // }
 
 
     //verifica se a base possui as habilidades necessárias para cumprir a missão
     for(int i = 0; i < N_BASES; i++){
         struct base *b = &mundo->bases[i]; //base atual
 
+        printf("%6d: MISSAO %d BASE %d DIST %d HEROIS [" ,
+            tempo,
+            m->id,
+            mundo->bases[i].id,
+            distancia_euclidiana(mundo->bases->coord, m->coordenadas));
+
+        cjto_imprime(mundo->bases[i].presentes);
+        printf("] \n");
+
         if(cjto_contem(b->habilidades, m->habilidades) && b->lotacao != 0){
             bases_aptas[aptas] = b;//adiciona base atual (marcada como apta) ao vetor
             aptas++;
         }
     }
-
-    printf("%6d: MISSAO %d BASE %d DIST %d HEROIS [" ,
-        tempo,
-        m->id,
-        mundo->bases->id,
-        distancia_euclidiana(mundo->bases->coord, m->coordenadas));
-
-    cjto_imprime(mundo->bases->habilidades);
-    printf("] \n");
 
     //se não houver bases aptas a cumprir a missão, adia
     if(aptas == 0){
@@ -291,26 +312,30 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
 
 
     //para cada heroi presente na base mais próxima
-    for(int i = 0; i < cjto_card(mundo->bases[BMP].presentes); i++){
-        //se o heroi não está morto
-        if(mundo->herois[i].status == 0){
-            int heroi_id = mundo->herois[i].id;
-            struct heroi *h = &mundo->herois[heroi_id];
+    for(int i = 0; i < N_HEROIS; i++){
+            
+        if(cjto_pertence(mundo->bases[BMP].presentes, i))
+            //se o heroi não está morto
+            if(mundo->herois[i].status == 0){
+                int heroi_id = mundo->herois[i].id;
+                struct heroi *h = &mundo->herois[heroi_id];
 
-            float risco = m->perigo / (h->paciencia + h->experiencia + 1.0);
+                //float risco = m->perigo / (h->paciencia + h->experiencia + 1.0);
+                int risco = m->perigo / (h->paciencia + h->experiencia + 1);
 
-            if(risco > aleat(0, 30)){
-                CriaInsere(tempo, TIPO_MORRE, h->id, bases_aptas[BMP]->id, fprio);
-                h->status = 1;
-                mundo->eventos_tratados++;
-                mundo->mortalidade++;
-                printf("%6d: MORRE HEROI %2d MISSAO %d \n",
-                        tempo,
-                        h->id,
-                        m->id);
-            }else{
-                h->experiencia++;
-            }
+                if(risco > aleat(0, 30)){
+                    //CriaInsere(tempo, TIPO_MORRE, h->id, bases_aptas[BMP]->id, fprio);
+                    CriaInsere(tempo, TIPO_MORRE, h->id, BMP, fprio);
+                    h->status = 1;
+                    mundo->eventos_tratados++;
+                    mundo->mortalidade++;
+                    printf("%6d: MORRE HEROI %2d MISSAO %d \n",
+                            tempo,
+                            h->id,
+                            m->id);
+                }else{
+                    h->experiencia++;
+                }
         }
     }
 }
