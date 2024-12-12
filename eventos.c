@@ -12,16 +12,19 @@
 
 
 void chega(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio){
-    if (h->base_atual->id == b->id) {
-        // Evita que um herói já presente na base seja processado novamente.
-        return;
-    }
 
     h->base_atual->id = b->id;
 
 
     if (cjto_card(b->presentes) < b->lotacao && fila_vazia(b->espera)) {
         //espera=true
+        printf("%6d: CHEGA HEROI %2d BASE %d (%d/%d) ESPERA\n",
+                tempo,
+                h->id,
+                b->id,
+                cjto_card(b->presentes),
+                b->lotacao);
+
         CriaInsere(tempo, TIPO_ESPERA, h->id, b->id, fprio);
         mundo->eventos_tratados++;
     }else
@@ -29,11 +32,26 @@ void chega(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, stru
         //espera =  (paciência de H) > (10 * tamanho da fila em B)
         if(h->paciencia > 10 * fila_tamanho(b->espera))
         {
+                printf("%6d: CHEGA HEROI %2d BASE %d (%d/%d) ESPERA \n",
+                tempo,
+                h->id,
+                b->id,
+                cjto_card(b->presentes),
+                b->lotacao);
+
+
             CriaInsere(tempo, TIPO_ESPERA, h->id, b->id, fprio);
             mundo->eventos_tratados++;
         }
         else
         {
+                printf("%6d: CHEGA HEROI %2d BASE %d (%d/%d) DESISTE \n",
+                tempo,
+                h->id,
+                b->id,
+                cjto_card(b->presentes),
+                b->lotacao);
+
             CriaInsere(tempo, TIPO_DESISTE, h->id, b->id, fprio);
             mundo->eventos_tratados++;
         }
@@ -41,14 +59,11 @@ void chega(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, stru
 
 }
 
-
 void espera(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio) {
-    if (!fila_contem(b->espera, h->id)) {
-        enqueue(b->espera, h->id);
-        CriaInsere(tempo, TIPO_AVISA, b->id, -1, fprio);
-        printf("%6d: ESPERA HEROI %2d BASE %d (%d) \n", 
-               tempo, h->id, b->id, fila_tamanho(b->espera));
-    }
+    enqueue(b->espera, h->id);
+    CriaInsere(tempo, TIPO_AVISA, b->id, -1, fprio);
+    printf("%6d: ESPERA HEROI %2d BASE %d (%d) \n", 
+           tempo, h->id, b->id, fila_tamanho(b->espera));
     mundo->eventos_tratados++;
 }
 
@@ -63,19 +78,21 @@ void desiste(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, st
 }
 
 void avisa(int tempo, struct base *b, struct mundo *mundo, struct fprio_t *fprio){
-    printf("%6d: AVISA PORTEIRO BASE %d (%2d/%2d) FILA [ ",
-            tempo,
-            b->id, 
-            cjto_card(b->presentes),
-            b->lotacao);
-    cjto_imprime(b->presentes);
-    printf("] \n");
-    
     int heroi_id = mundo->herois[0].id;
     while (cjto_card(b->presentes) < b->lotacao && !fila_vazia(b->espera)){//enquanto houver vaga e fila de espera
 
         dequeue(b->espera, &heroi_id);//retira o heroi da fila de espera (&heroi_id é atribuido como referencia(&) ao primeiro heroi da fila)
+
+        printf("%6d: AVISA PORTEIRO BASE %d (%2d/%2d) FILA [ ",
+                tempo,
+                b->id, 
+                cjto_card(b->presentes),
+                b->lotacao);
+            
+        cjto_imprime(b->presentes);
+        printf("] \n");
     
+
         cjto_insere(b->presentes, heroi_id);//cjto_insere pede um int, por isso o uso de heroi_id
     
         CriaInsere(tempo, TIPO_ENTRA, heroi_id, b->id, fprio);
@@ -90,15 +107,12 @@ void avisa(int tempo, struct base *b, struct mundo *mundo, struct fprio_t *fprio
 }
 
 void entra(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio){
-    
-    if (h->base_atual->id == b->id) {
-        // Evita que um herói já presente na base seja processado novamente.
-        return;
-    }
 
     h->base_atual->id = b->id;//atualiza base atual do heroi
 
-    cjto_uniao(b->habilidades, h->habilidades);//adiciona habilidades do heroi as habilidades da base
+    struct cjto_t *novo_habilidades = cjto_uniao(b->habilidades, h->habilidades);
+    cjto_destroi(b->habilidades); // Agora é seguro destruir o conjunto antigo
+    b->habilidades = novo_habilidades; // Atualiza para o novo conjunto
     
     int TPB = 15 + h->paciencia * (rand() % 20 + 1);
         
@@ -161,7 +175,10 @@ void viaja(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, stru
     int base_anterior = h->base_atual->id;
 
     h->base_atual->id = h->base_destino->id;
-    CriaInsere(tempo, TIPO_CHEGA, h->id, b->id, fprio);
+
+    int tempo_inserir = tempo + duracao;
+
+    CriaInsere(tempo_inserir, TIPO_CHEGA, h->id, h->base_destino->id, fprio);
     mundo->eventos_tratados++;
 
     printf("%6d: VIAJA  HEROI %2d BASE %d BASE %d DIST %d VEL %d CHEGA %d \n",
@@ -188,25 +205,26 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
     cjto_imprime(m->habilidades);
     printf("] \n");
 
-    // printf("%6d: MISSAO %d BASE %d DIST %d HEROIS [" ,
-    //         tempo,
-    //         m->id,
-    //         mundo->bases->id,
-    //         distancia_euclidiana(mundo->bases->coord, m->coordenadas));
 
-    // cjto_imprime(mundo->bases->habilidades);
-    // printf("] \n");
-    
-    // for(int i = 0; i < N_HEROIS; i++){
-    //     struct heroi *h = &mundo->herois[i];
-    //     printf("%6d: MISSAO %d HAB HEROI %2d: [",
-    //             tempo,
-    //             m->id,
-    //             h->id);
-    //     cjto_imprime(h->habilidades);
-    //     printf("] \n");
-    // }
+    printf("%6d: MISSAO %d BASE %d DIST %d HEROIS [" ,
+            tempo,
+            m->id,
+            mundo->bases->id,
+            distancia_euclidiana(mundo->bases->coord, m->coordenadas));
 
+    cjto_imprime(mundo->bases->habilidades);
+    printf("] \n");
+/*     
+    for(int i = 0; i < N_HEROIS; i++){
+        struct heroi *h = &mundo->herois[i];
+        printf("%6d: MISSAO %d HAB HEROI %2d: [",
+                tempo,
+                m->id,
+                h->id);
+        cjto_imprime(h->habilidades);
+        printf("] \n");
+    }
+*/
 
 
     //verifica se a base possui as habilidades necessárias para cumprir a missão
@@ -218,6 +236,15 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
             aptas++;
         }
     }
+
+    printf("%6d: MISSAO %d BASE %d DIST %d HEROIS [" ,
+        tempo,
+        m->id,
+        mundo->bases->id,
+        distancia_euclidiana(mundo->bases->coord, m->coordenadas));
+
+    cjto_imprime(mundo->bases->habilidades);
+    printf("] \n");
 
     //se não houver bases aptas a cumprir a missão, adia
     if(aptas == 0){
@@ -244,28 +271,28 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
 
     //está dando segfault sempre que tento acessar qualquer informação de bases_aptas[BMP]
 
-
-    cjto_imprime(bases_aptas[BMP]->habilidades);
+    cjto_imprime(mundo->bases[BMP].habilidades);
     printf(" ] \n");
 
 
-    bases_aptas[BMP]->missoes_cumpridas++;               //atualiza missões cumpridas
+    mundo->bases[BMP].missoes_cumpridas++;               //atualiza missões cumpridas
     mundo->missoes_cumpridas++;                         //atualiza missões cumpridas
     m->tentativas++;                                    //atualiza tentativas (essa bem sucedida)
 
-    //tratamento com min/max
-    if(m->tentativas < m->tentativas_min){
+    // Tratamento com min/max
+    if (m->tentativas < m->tentativas_min) {
         m->tentativas_min = m->tentativas;
     }
 
-    if(m->tentativas > m->tentativas_max){
-        m->tentativas_max = m->tentativas;
+    if (m->tentativas > m->tentativas_max) {
+        m->tentativas_max = m->tentativas; // Atualiza o máximo
     }
 
-    //para cada heroi presente na base mais próxima
-    for(int i = 0; i < cjto_card(bases_aptas[BMP]->presentes); i++){
 
-        int heroi_id = cjto_card(bases_aptas[BMP]->presentes);
+    //para cada heroi presente na base mais próxima
+    for(int i = 0; i < cjto_card(mundo->bases[BMP].presentes); i++){
+
+        int heroi_id = cjto_card(mundo->bases[BMP].presentes);
         struct heroi *h = &mundo->herois[heroi_id];
 
         float risco = m->perigo / (h->paciencia + h->experiencia + 1.0);
@@ -282,7 +309,6 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
             h->experiencia++;
         }
     }
-
 }
 
 void morre(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio){
@@ -297,13 +323,6 @@ void fim(struct mundo *mundo)
 {
     int i;
     double percentual_missoes_cumpridas;
-
-    int tentativas_total;
-
-    //calcula quantas tentativas foram feitas no total
-    for(i = 0; i < N_MISSOES; i++){
-        tentativas_total += mundo->missoes[i].tentativas;
-    }
 
     printf("%d: FIM\n", T_FIM);
 
@@ -329,6 +348,9 @@ void fim(struct mundo *mundo)
         // Imprime as habilidades do herói
         cjto_imprime(h->habilidades);
         printf("]\n");
+
+        //desaloca os atributos do heroi
+        destroi_heroi(h);
     }
 
     // Imprime informações sobre as bases
@@ -339,6 +361,9 @@ void fim(struct mundo *mundo)
             fila_tamanho(mundo->bases[i].espera),
             mundo->bases[i].missoes_cumpridas);
 
+        //libera as coordenadas da base
+        free(mundo->bases[i].coord);
+        cjto_destroi(mundo->bases[i].habilidades); // Libera o conjunto de habilidades
         cjto_destroi(mundo->bases[i].presentes); // Libera o conjunto de presentes
         fila_destroi(&mundo->bases[i].espera); // Libera a fila de espera
     }
@@ -353,17 +378,12 @@ void fim(struct mundo *mundo)
            mundo->quant_missoes,
            percentual_missoes_cumpridas);
 
-    printf("TENTATIVAS/MISSAO: MIN %d, MAX %d, MEDIA %.1d",
-           mundo->missoes[0].tentativas_min,
-           mundo->missoes[0].tentativas_max,
-           tentativas_total / mundo->quant_missoes);
+    printf("TENTATIVAS/MISSAO: MIN %d, MAX %d, MEDIA %.1d \n",
+           mundo->missoes->tentativas_min,
+           mundo->missoes->tentativas_max,
+           mundo->missoes->tentativas / mundo->quant_missoes);
 
     printf("TAXA MORTALIDADE: %.1f%%\n", (double)mundo->mortalidade * 100 / N_HEROIS);
-
-    // Libera as missões
-    for (i = 0; i < N_MISSOES; i++) {
-        cjto_destroi(mundo->missoes[i].habilidades); // Libera as habilidades necessárias
-    }
 
     // Libera o conjunto de habilidades do mundo
     cjto_destroi(mundo->habilidades);
@@ -371,9 +391,11 @@ void fim(struct mundo *mundo)
     // Libera a fila de fprio
     fprio_destroi(mundo->eventos); 
 
-    free(mundo->herois->base_atual->coord);
-    free(mundo->herois->base_atual);
-    free(mundo->herois->base_destino->coord);
-    free(mundo->herois->base_destino);
+    // Libera as coordenadas das missões
+    for (i = 0; i < N_MISSOES; i++) {
+        free(mundo->missoes[i].coordenadas);
+        cjto_destroi(mundo->missoes[i].habilidades);
+    }
+
 
 }

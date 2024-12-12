@@ -14,6 +14,7 @@ void inicia_mundo(struct mundo *mundo)
     // Inicialize os campos diretamente
     mundo->relogio = T_INICIO;
     mundo->missoes_cumpridas = 0;
+    mundo->mortalidade = 0;
     mundo->missoes_adiadas = 0;
     mundo->quant_missoes = N_MISSOES;
     mundo->habilidades = cjto_cria(N_HABILIDADES);

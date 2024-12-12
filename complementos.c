@@ -104,7 +104,7 @@ void quicksort(struct base *bases[], int inicio, int fim, const struct missao *m
 // que será calculada com essa função
 // e ordenada com o timsort
 int distancia_euclidiana(struct coordenadas *coord1, struct coordenadas *coord2){
-        if (!coord1 || !coord2) {
+    if (!coord1 || !coord2) {
         fprintf(stderr, "Erro: coordenadas inválidas.\n");
         return -1;  // Ou outro valor que indique erro
     }
@@ -121,4 +121,35 @@ void CriaInsere(int tempo, int tipo, int dado1, int dado2, struct fprio_t *fprio
     struct evento_t *evento = cria_evento(tempo, tipo, dado1, dado2);
     fprio_insere(fprio, evento, tipo, tempo);
 }
+
+void destroi_missao(struct missao *missao) {
+    if (missao->habilidades) {
+        cjto_destroi(missao->habilidades);
+        missao->habilidades = NULL;
+    }
+    if (missao->coordenadas) {
+        free(missao->coordenadas);
+        missao->coordenadas = NULL;
+    }
+}
+
+
+
+void destroi_heroi(struct heroi *h) {
+    if (h->habilidades) {
+        cjto_destroi(h->habilidades);
+        h->habilidades = NULL;
+    }
+    if (h->base_atual) {
+        free(h->base_atual->coord);
+        free(h->base_atual);
+        h->base_atual = NULL;
+    }
+    if (h->base_destino) {
+        free(h->base_destino->coord);
+        free(h->base_destino);
+        h->base_destino = NULL;
+    }
+}
+
 

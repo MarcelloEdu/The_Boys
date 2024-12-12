@@ -31,5 +31,11 @@ void CriaInsere(int tempo, int tipo, int dado1, int dado2, struct fprio_t *fprio
 //função pra aleatorizar
 int aleat(int min, int max);
 
+void destroi_missao(struct missao *missao);
+
+void destroi_base(struct base *b);
+
+void destroi_heroi(struct heroi *h);
+
 #endif
 

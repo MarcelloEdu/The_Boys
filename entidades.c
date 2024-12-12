@@ -10,6 +10,7 @@
 
 struct base inicia_base(struct base *base, int id) {
     base->id = id;
+    base->missoes_cumpridas = 0;
     base->lotacao = aleat(3, 10);
     base->presentes = cjto_cria(N_HEROIS);
     base->espera = fila_cria();
@@ -22,6 +23,7 @@ struct base inicia_base(struct base *base, int id) {
 }
 
 struct heroi inicia_heroi(struct heroi *heroi, int id) {
+    
     heroi->id = id;
     heroi->experiencia = 0;
     heroi->paciencia = aleat(0, 100);

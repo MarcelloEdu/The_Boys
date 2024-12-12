@@ -13,7 +13,7 @@
 #include "complementos.h"
 
 int main() {
-    struct mundo mundo;
+    struct mundo mundo = {0};
     struct evento_t *ev;
     inicia_mundo(&mundo);
 
@@ -67,8 +67,9 @@ int main() {
                 fprintf(stderr, "Evento desconhecido: %d\n", ev->tipo);
         }
 
+        //desaloca todos os eventos
         destroi_evento(ev);
-    }
 
+    }
     return 0;
 }
