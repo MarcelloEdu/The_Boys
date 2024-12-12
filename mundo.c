@@ -55,7 +55,6 @@ void inicia_mundo(struct mundo *mundo)
         
         // Cria o evento de missão e insere na fila de prioridade
         CriaInsere(tempo, TIPO_MISSAO, mundo->missoes[i].id, -1, mundo->eventos);
-        mundo->quant_missoes++;
     }
 
     // Cria o evento de fim e insere na fila de prioridade

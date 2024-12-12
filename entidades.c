@@ -61,6 +61,7 @@ void inicia_missao(struct missao *missao, int id) {
     missao->tentativas = 1;
     missao->tentativas_max = 0;
     missao->tentativas_min = 999;
+    missao->perigo = aleat(0, 100);
 
     for (i = 0; i < numero_habilidades; ++i) 
     {

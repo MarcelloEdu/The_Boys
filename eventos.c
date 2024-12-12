@@ -291,22 +291,25 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
 
     //para cada heroi presente na base mais próxima
     for(int i = 0; i < cjto_card(mundo->bases[BMP].presentes); i++){
+        //se o heroi não está morto
+        if(mundo->herois[i].status == 0){
+            int heroi_id = mundo->herois[i].id;
+            struct heroi *h = &mundo->herois[heroi_id];
 
-        int heroi_id = cjto_card(mundo->bases[BMP].presentes);
-        struct heroi *h = &mundo->herois[heroi_id];
+            float risco = m->perigo / (h->paciencia + h->experiencia + 1.0);
 
-        float risco = m->perigo / (h->paciencia + h->experiencia + 1.0);
-
-        if(risco > aleat(0, 30)){
-            CriaInsere(tempo, TIPO_MORRE, h->id, bases_aptas[BMP]->id, fprio);
-            mundo->eventos_tratados++;
-            mundo->mortalidade++;
-            printf("%6d: MORRE HEROI %2d MISSAO %d \n",
-                    tempo,
-                    h->id,
-                    m->id);
-        }else{
-            h->experiencia++;
+            if(risco > aleat(0, 30)){
+                CriaInsere(tempo, TIPO_MORRE, h->id, bases_aptas[BMP]->id, fprio);
+                h->status = 1;
+                mundo->eventos_tratados++;
+                mundo->mortalidade++;
+                printf("%6d: MORRE HEROI %2d MISSAO %d \n",
+                        tempo,
+                        h->id,
+                        m->id);
+            }else{
+                h->experiencia++;
+            }
         }
     }
 }
@@ -330,7 +333,7 @@ void fim(struct mundo *mundo)
     for (int i = 0; i < N_HEROIS; i++) {
         struct heroi *h = &mundo->herois[i];
 
-        if (h->status==1) {
+        if (h->status == 1) {
             printf("HEROI %2d MORTO PAC %3d VEL %4d EXP %4d HABS [", 
                    i, 
                    h->paciencia, 
