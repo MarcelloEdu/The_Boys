@@ -59,6 +59,10 @@ int main() {
                 missao(mundo.relogio, &mundo.missoes[ev->dado1], &mundo, mundo.eventos);
                 break;
 
+            case TIPO_MORRE:
+                morre(mundo.relogio, &mundo.herois[ev->dado1], &mundo.bases[ev->dado2], &mundo, mundo.eventos);
+                break;
+                
             case TIPO_FIM:
                 fim(&mundo);
                 break;
