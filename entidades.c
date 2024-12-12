@@ -41,12 +41,7 @@ struct heroi inicia_heroi(struct heroi *heroi, int id) {
 
     int tam_habilidade = aleat(1, 3);
 
-    heroi->habilidades = cjto_cria(tam_habilidade);
-
-    for (int i= 0; i < N_HABILIDADES; i++) {
-        cjto_insere(heroi->habilidades, aleat(1, N_HABILIDADES));
-    }
-
+    heroi->habilidades = cjto_aleat(tam_habilidade, N_HABILIDADES); 
     return *heroi;
 }
 

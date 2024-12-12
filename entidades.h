@@ -7,7 +7,7 @@
 #define N_HABILIDADES 10
 #define TAMANHO_MUNDO 20000
 #define N_HEROIS (N_HABILIDADES * 5)
-#define N_BASES (N_HEROIS / 6)
+#define N_BASES (N_HEROIS / 5)
 #define N_MISSOES (T_FIM / 100)
 
 struct coordenadas
