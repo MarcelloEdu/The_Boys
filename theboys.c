@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "fprio.h"
 #include "lista.h"
 #include "conjunto.h"
@@ -13,6 +14,7 @@
 #include "complementos.h"
 
 int main() {
+    srand(time(NULL));
     struct mundo mundo = {0};
     struct evento_t *ev;
     inicia_mundo(&mundo);
