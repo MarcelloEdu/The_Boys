@@ -94,7 +94,6 @@ void avisa(int tempo, struct base *b, struct mundo *mundo, struct fprio_t *fprio
                 b->lotacao);
             
         fila_imprime(b->espera);
-        printf("] \n");
     
 
         cjto_insere(b->presentes, heroi_id);//cjto_insere pede um int, por isso o uso de heroi_id
