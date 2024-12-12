@@ -9,10 +9,6 @@
 #include "mundo.h"
 
 
-
-#define RUN 32
-
-
 int aleat(int min, int max)
 {
     return rand() % (max - min + 1) + min;
