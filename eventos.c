@@ -13,6 +13,9 @@
 
 void chega(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio){
 
+    if(h->status == 1)
+        return;
+    
     h->base_atual->id = b->id;
 
 
@@ -268,8 +271,6 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
             m->id,
             BMP);
     
-
-    //está dando segfault sempre que tento acessar qualquer informação de bases_aptas[BMP]
 
     cjto_imprime(mundo->bases[BMP].habilidades);
     printf(" ] \n");
