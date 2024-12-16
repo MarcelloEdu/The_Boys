@@ -25,6 +25,9 @@ struct mundo {
     int missoes_adiadas;
     int mortalidade;
     int eventos_tratados;
+    int tentativas_total;
+    int tentativas_min;
+    int tentativas_max;
 };
 
 // Funções para criar, manipular e remover eventos

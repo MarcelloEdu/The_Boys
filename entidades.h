@@ -45,9 +45,8 @@ struct missao
     int id;
     struct cjto_t *habilidades;
     struct coordenadas *coordenadas;
+    int tentativas_atual;
     int tentativas;
-    int tentativas_max;
-    int tentativas_min;
     int perigo;
 };
 

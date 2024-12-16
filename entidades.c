@@ -39,9 +39,9 @@ struct heroi inicia_heroi(struct heroi *heroi, int id) {
     heroi->base_destino->coord->x = 0;
     heroi->base_destino->coord->y = 0;
 
-    int tam_habilidade = aleat(1, 3);
+    int tam_hab = aleat(1, 3);
+    heroi->habilidades = cjto_aleat(tam_hab, N_HABILIDADES);
 
-    heroi->habilidades = cjto_aleat(tam_habilidade, N_HABILIDADES); 
     return *heroi;
 }
 
@@ -56,13 +56,11 @@ void inicia_missao(struct missao *missao, int id) {
     int numero_habilidades = aleat(6, 10); 
     missao->habilidades = cjto_cria(numero_habilidades);
     missao->tentativas = 1;
-    missao->tentativas_max = 0;
-    missao->tentativas_min = 999;
     missao->perigo = aleat(0, 100);
 
     for (i = 0; i < numero_habilidades; ++i) 
     {
-        int habilidade = aleat(1, N_HABILIDADES);
+        int habilidade = aleat(0, N_HABILIDADES - 1);
         cjto_insere(missao->habilidades, habilidade);
     }
 }
