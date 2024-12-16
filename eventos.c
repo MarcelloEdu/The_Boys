@@ -81,13 +81,12 @@ void desiste(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, st
 }
 
 void avisa(int tempo, struct base *b, struct mundo *mundo, struct fprio_t *fprio){
-
     int heroi_id = mundo->herois[0].id;
     while (cjto_card(b->presentes) < b->lotacao && !fila_vazia(b->espera)){//enquanto houver vaga e fila de espera
 
         dequeue(b->espera, &heroi_id);//retira o heroi da fila de espera (&heroi_id é atribuido como referencia(&) ao primeiro heroi da fila)
 
-        printf("%6d: AVISA PORTEIRO BASE %d (%2d/%2d) FILA [ ",
+        printf("%6d: AVISA PORTEIRO BASE %d (%2d/%2d) FILA ",
                 tempo,
                 b->id, 
                 cjto_card(b->presentes),
@@ -139,29 +138,18 @@ void entra(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, stru
 
 void sai(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio) {
 
-    // /* Verificação para retirar habilidades da base, mas só se não houver duplicatas de outros heróis */
-    // for (int i = 0; i < N_HABILIDADES; i++) {  // para cada habilidade
-    //     if (cjto_pertence(b->presentes, i) && i != h->id) {  // se a habilidade pertence à base e não é a do herói
-    //         if (!(cjto_contem(h->habilidades, mundo->herois[i].habilidades))) {  // se a habilidade não pertence a outro herói que ainda está na base
-    //             for (int j = 0; j < N_HABILIDADES; j++) {  // para cada habilidade
-    //                 if (cjto_pertence(h->habilidades, j) && cjto_pertence(mundo->herois[i].habilidades, j)) {  // se a habilidade do herói for a mesma do herói que continua na base
-    //                     cjto_retira(b->habilidades, j);  // retira a habilidade da base
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    struct cjto_t *novo_habilidades = cjto_cria(N_HABILIDADES);
-
-    for(int i = 0; i < N_HEROIS; i++){    
-        
-        if(i != h->id && cjto_pertence(b->presentes, i)){
-            novo_habilidades = cjto_uniao(novo_habilidades, mundo->herois[i].habilidades);
+    /* Verificação para retirar habilidades da base, mas só se não houver duplicatas de outros heróis */
+    for (int i = 0; i < N_HABILIDADES; i++) {  // para cada habilidade
+        if (cjto_pertence(b->habilidades, i) && i != h->id) {  // se a habilidade pertence à base e não é a do herói
+            if (!(cjto_contem(h->habilidades, mundo->herois[i].habilidades))) {  // se a habilidade não pertence a outro herói que ainda está na base
+                for (int j = 0; j < N_HABILIDADES; j++) {  // para cada habilidade
+                    if (cjto_pertence(h->habilidades, j) && cjto_pertence(mundo->herois[i].habilidades, j)) {  // se a habilidade do herói for a mesma do herói que continua na base
+                        cjto_retira(b->habilidades, j);  // retira a habilidade da base
+                    }
+                }
+            }
         }
     }
-
-    b->habilidades = novo_habilidades;
 
     if(h->status == 1)
         return;
@@ -219,6 +207,7 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
     struct base *bases_aptas[N_BASES];//vetor de bases aptas a cumprir a missão
     int aptas = 0;
     int dia_seguinte = tempo + 24*60;
+    mundo->tentativas_total++;
 
     printf("%6d: MISSAO %d TENT %d HAB REQ: [ ",
             tempo,
@@ -228,41 +217,9 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
     cjto_imprime(m->habilidades);
     printf("] \n");
 
-
-    // printf("%6d: MISSAO %d BASE %d DIST %d HEROIS [" ,
-    //         tempo,
-    //         m->id,
-    //         mundo->bases->id,
-    //         distancia_euclidiana(mundo->bases->coord, m->coordenadas));
-
-    // cjto_imprime(mundo->bases->presentes);
-    // printf("] \n");
-
-
-    // for(int i = 0; i < N_HEROIS; i++){
-    //     struct heroi *h = &mundo->herois[i];
-    //     printf("%6d: MISSAO %d HAB HEROI %2d: [",
-    //             tempo,
-    //             m->id,
-    //             h->id);
-    //     cjto_imprime(h->habilidades);
-    //     printf("] \n");
-    // }
-
-
     //verifica se a base possui as habilidades necessárias para cumprir a missão
     for(int i = 0; i < N_BASES; i++){
         struct base *b = &mundo->bases[i]; //base atual
-
-        printf("%6d: MISSAO %d BASE %d DIST %d HEROIS [" ,
-            tempo,
-            m->id,
-            mundo->bases[i].id,
-            distancia_euclidiana(mundo->bases->coord, m->coordenadas));
-
-        cjto_imprime(mundo->bases[i].presentes);
-        printf("] \n");
-
         if(cjto_contem(b->habilidades, m->habilidades) && b->lotacao != 0){
             bases_aptas[aptas] = b;//adiciona base atual (marcada como apta) ao vetor
             aptas++;
@@ -277,6 +234,17 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
         CriaInsere(dia_seguinte, TIPO_MISSAO, m->id, -1, fprio); //adia p dia seguinte
         mundo->eventos_tratados++;
         m->tentativas++;                                        //atualiza tentativas
+
+            // Tratamento com min/max
+    // Tratamento com min/max
+    if (m->tentativas < mundo->tentativas_min) {
+        mundo->tentativas_min = m->tentativas;
+    }
+
+    if (m->tentativas > mundo->tentativas_max) {
+        mundo->tentativas_max = m->tentativas; // Atualiza o máximo
+    }
+
         return;
     }
 
@@ -291,41 +259,33 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
             m->id,
             BMP);
     
-
     cjto_imprime(mundo->bases[BMP].habilidades);
     printf(" ] \n");
-
 
     mundo->bases[BMP].missoes_cumpridas++;               //atualiza missões cumpridas
     mundo->missoes_cumpridas++;                         //atualiza missões cumpridas
     m->tentativas++;                                    //atualiza tentativas (essa bem sucedida)
 
     // Tratamento com min/max
-    if (m->tentativas < m->tentativas_min) {
-        m->tentativas_min = m->tentativas;
+    if (m->tentativas < mundo->tentativas_min) {
+        mundo->tentativas_min = m->tentativas;
     }
 
-    if (m->tentativas > m->tentativas_max) {
-        m->tentativas_max = m->tentativas; // Atualiza o máximo
+    if (m->tentativas > mundo->tentativas_max) {
+        mundo->tentativas_max = m->tentativas; // Atualiza o máximo
     }
-
 
     //para cada heroi presente na base mais próxima
     for(int i = 0; i < N_HEROIS; i++){
-            
-        if(cjto_pertence(mundo->bases[BMP].presentes, i))
-            //se o heroi não está morto
-            if(mundo->herois[i].status == 0){
+        if(cjto_pertence(mundo->bases[BMP].presentes, i)){
+            if(mundo->herois->status == 0){
                 int heroi_id = mundo->herois[i].id;
                 struct heroi *h = &mundo->herois[heroi_id];
 
-                //float risco = m->perigo / (h->paciencia + h->experiencia + 1.0);
                 int risco = m->perigo / (h->paciencia + h->experiencia + 1);
 
                 if(risco > aleat(0, 30)){
-                    //CriaInsere(tempo, TIPO_MORRE, h->id, bases_aptas[BMP]->id, fprio);
                     CriaInsere(tempo, TIPO_MORRE, h->id, BMP, fprio);
-                    h->status = 1;
                     mundo->eventos_tratados++;
                     mundo->mortalidade++;
                     printf("%6d: MORRE HEROI %2d MISSAO %d \n",
@@ -335,6 +295,7 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
                 }else{
                     h->experiencia++;
                 }
+            }
         }
     }
 }
@@ -358,7 +319,7 @@ void fim(struct mundo *mundo)
     for (int i = 0; i < N_HEROIS; i++) {
         struct heroi *h = &mundo->herois[i];
 
-        if (h->status == 1) {
+        if (h->status==1) {
             printf("HEROI %2d MORTO PAC %3d VEL %4d EXP %4d HABS [", 
                    i, 
                    h->paciencia, 
@@ -406,10 +367,11 @@ void fim(struct mundo *mundo)
            mundo->quant_missoes,
            percentual_missoes_cumpridas);
 
-    printf("TENTATIVAS/MISSAO: MIN %d, MAX %d, MEDIA %.1d \n",
-           mundo->missoes->tentativas_min,
-           mundo->missoes->tentativas_max,
-           mundo->missoes->tentativas / mundo->quant_missoes);
+    printf("TENTATIVAS/MISSAO: MIN %d, MAX %d, MEDIA %.1f \n",
+           mundo->tentativas_min,
+           mundo->tentativas_max,
+           (double)mundo->tentativas_total / mundo->quant_missoes);
+
 
     printf("TAXA MORTALIDADE: %.1f%%\n", (double)mundo->mortalidade * 100 / N_HEROIS);
 
