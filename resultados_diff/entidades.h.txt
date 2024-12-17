@@ -1,0 +1,10 @@
+--- theboys(7)/entidades.h	2024-12-12 17:44:56.000000000 -0300
++++ The_Boys//entidades.h	2024-12-16 22:48:04.811969000 -0300
+@@ -21,6 +21,7 @@
+     int id;
+     int lotacao;
+     int missoes_cumpridas;
++    int fila_max;
+     struct cjto_t *habilidades;
+     struct cjto_t *presentes;
+     struct fila *espera;
