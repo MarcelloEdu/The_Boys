@@ -13,7 +13,7 @@
 #include "complementos.h"
 
 int main() {
-    srand(256);
+    srand(0);
     struct mundo mundo = {0};
     struct evento_t *ev;
     inicia_mundo(&mundo);

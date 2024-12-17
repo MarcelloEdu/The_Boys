@@ -7,7 +7,7 @@
 #define N_HABILIDADES 10
 #define TAMANHO_MUNDO 20000
 #define N_HEROIS (N_HABILIDADES * 5)
-#define N_BASES (N_HEROIS / 5)
+#define N_BASES (N_HEROIS / 6)
 #define N_MISSOES (T_FIM / 100)
 
 struct coordenadas
@@ -21,6 +21,7 @@ struct base
     int id;
     int lotacao;
     int missoes_cumpridas;
+    int fila_max;
     struct cjto_t *habilidades;
     struct cjto_t *presentes;
     struct fila *espera;
@@ -45,8 +46,9 @@ struct missao
     int id;
     struct cjto_t *habilidades;
     struct coordenadas *coordenadas;
-    int tentativas_atual;
     int tentativas;
+    int tentativas_max;
+    int tentativas_min;
     int perigo;
 };
 

@@ -64,6 +64,9 @@ void chega(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, stru
 
 void espera(int tempo, struct heroi *h, struct base *b, struct mundo *mundo, struct fprio_t *fprio) {
     enqueue(b->espera, h->id);
+    if(b->fila_max < fila_tamanho(b->espera))
+        b->fila_max = fila_tamanho(b->espera);
+
     CriaInsere(tempo, TIPO_AVISA, b->id, -1, fprio);
     printf("%6d: ESPERA HEROI %2d BASE %d (%d) \n", 
            tempo, h->id, b->id, fila_tamanho(b->espera));
@@ -207,7 +210,6 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
     struct base *bases_aptas[N_BASES];//vetor de bases aptas a cumprir a missão
     int aptas = 0;
     int dia_seguinte = tempo + 24*60;
-    mundo->tentativas_total++;
 
     printf("%6d: MISSAO %d TENT %d HAB REQ: [ ",
             tempo,
@@ -234,17 +236,14 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
         CriaInsere(dia_seguinte, TIPO_MISSAO, m->id, -1, fprio); //adia p dia seguinte
         mundo->eventos_tratados++;
         m->tentativas++;                                        //atualiza tentativas
+        mundo->tentativas_total++;                              //atualiza tentativas total
+        if (m->tentativas < mundo->tentativas_min) {
+            mundo->tentativas_min = m->tentativas;
+        }
 
-            // Tratamento com min/max
-    // Tratamento com min/max
-    if (m->tentativas < mundo->tentativas_min) {
-        mundo->tentativas_min = m->tentativas;
-    }
-
-    if (m->tentativas > mundo->tentativas_max) {
-        mundo->tentativas_max = m->tentativas; // Atualiza o máximo
-    }
-
+        if (m->tentativas > mundo->tentativas_max) {
+            mundo->tentativas_max = m->tentativas; // Atualiza o máximo
+        }
         return;
     }
 
@@ -262,9 +261,11 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
     cjto_imprime(mundo->bases[BMP].habilidades);
     printf(" ] \n");
 
+
     mundo->bases[BMP].missoes_cumpridas++;               //atualiza missões cumpridas
     mundo->missoes_cumpridas++;                         //atualiza missões cumpridas
     m->tentativas++;                                    //atualiza tentativas (essa bem sucedida)
+    mundo->tentativas_total++;                          //atualiza tentativas total
 
     // Tratamento com min/max
     if (m->tentativas < mundo->tentativas_min) {
@@ -277,8 +278,9 @@ void missao(int tempo, struct missao *m, struct mundo *mundo, struct fprio_t *fp
 
     //para cada heroi presente na base mais próxima
     for(int i = 0; i < N_HEROIS; i++){
-        if(cjto_pertence(mundo->bases[BMP].presentes, i)){
-            if(mundo->herois->status == 0){
+
+        if(cjto_pertence(mundo->bases[BMP].presentes, i) == 1){
+            if(mundo->herois[i].status == 0){
                 int heroi_id = mundo->herois[i].id;
                 struct heroi *h = &mundo->herois[heroi_id];
 
@@ -347,7 +349,7 @@ void fim(struct mundo *mundo)
         printf("BASE %2d LOT %2d FILA MAX %2d MISSOES %d\n",
             i,
             mundo->bases[i].lotacao,
-            fila_tamanho(mundo->bases[i].espera),
+            mundo->bases[i].fila_max,
             mundo->bases[i].missoes_cumpridas);
 
         //libera as coordenadas da base
@@ -370,8 +372,7 @@ void fim(struct mundo *mundo)
     printf("TENTATIVAS/MISSAO: MIN %d, MAX %d, MEDIA %.1f \n",
            mundo->tentativas_min,
            mundo->tentativas_max,
-           (double)mundo->tentativas_total / mundo->quant_missoes);
-
+           (float)mundo->tentativas_total / mundo->quant_missoes);
 
     printf("TAXA MORTALIDADE: %.1f%%\n", (double)mundo->mortalidade * 100 / N_HEROIS);
 

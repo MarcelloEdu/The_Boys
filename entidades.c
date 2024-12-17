@@ -12,6 +12,7 @@ struct base inicia_base(struct base *base, int id) {
     base->id = id;
     base->missoes_cumpridas = 0;
     base->lotacao = aleat(3, 10);
+    base->fila_max = 0;
     base->presentes = cjto_cria(N_HEROIS);
     base->espera = fila_cria();
     base->habilidades = cjto_cria(N_HABILIDADES);
@@ -41,7 +42,6 @@ struct heroi inicia_heroi(struct heroi *heroi, int id) {
 
     int tam_hab = aleat(1, 3);
     heroi->habilidades = cjto_aleat(tam_hab, N_HABILIDADES);
-
     return *heroi;
 }
 
@@ -55,7 +55,7 @@ void inicia_missao(struct missao *missao, int id) {
     int i;
     int numero_habilidades = aleat(6, 10); 
     missao->habilidades = cjto_cria(numero_habilidades);
-    missao->tentativas = 1;
+    missao->tentativas = 0;
     missao->perigo = aleat(0, 100);
 
     for (i = 0; i < numero_habilidades; ++i) 

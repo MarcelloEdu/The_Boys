@@ -19,15 +19,15 @@ struct mundo {
     struct missao missoes[N_MISSOES];
     struct cjto_t *habilidades;
     struct fprio_t *eventos;
+    int tentativas_total;
+    int tentativas_max;
+    int tentativas_min;
     int quant_missoes;
     int relogio;
     int missoes_cumpridas;
     int missoes_adiadas;
     int mortalidade;
     int eventos_tratados;
-    int tentativas_total;
-    int tentativas_min;
-    int tentativas_max;
 };
 
 // Funções para criar, manipular e remover eventos

@@ -14,11 +14,11 @@ void inicia_mundo(struct mundo *mundo)
     mundo->missoes_cumpridas = 0;
     mundo->mortalidade = 0;
     mundo->missoes_adiadas = 0;
-    mundo->quant_missoes = N_MISSOES;
-    mundo->habilidades = cjto_cria(N_HABILIDADES);
     mundo->tentativas_total = 0;
     mundo->tentativas_max = 0;
     mundo->tentativas_min = 999;
+    mundo->quant_missoes = N_MISSOES;
+    mundo->habilidades = cjto_cria(N_HABILIDADES);
 
     if (mundo->habilidades == NULL) {
         fprintf(stderr, "Erro: Falha na alocação de habilidades.\n");
