@@ -38,7 +38,6 @@ Este projeto simula um mundo onde heróis, bases e missões interagem de forma �
 🔗<a href="https://wiki.inf.ufpr.br/maziero/doku.php?id=c:theboys-2024-2" target="_blank">Link do Enunciado</a>
 
 
-Confira os detalhes do enunciado no link oficial:
-Enunciado do Projeto
 🛠️ Tecnologias Utilizadas
+<br>
 <div style="display: flex; flex-direction: row; gap: 10px;"> <img alt="C" src="https://img.shields.io/badge/C-00599C?style=for-the-badge&logo=c&logoColor=white"> <img alt="Makefile" src="https://img.shields.io/badge/Makefile-0769AD?style=for-the-badge&logo=gnu&logoColor=white"> </div>
